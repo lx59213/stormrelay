@@ -596,6 +596,18 @@
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
         
+        // 时间字符串转秒数
+        function parseTimeToSeconds(time) {
+            if (!time) return 0;
+            const parts = time.split(':');
+            if (parts.length === 2) {
+                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } else if (parts.length === 3) {
+                return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+            }
+            return 0;
+        }
+        
         // 文件转 Base64
         function fileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -655,8 +667,7 @@
                 duration: '10:00',  // 默认时长，会在视频加载后更新
                 corePosition: {
                     content: 'AI分析中...',
-                    confirmed: false,
-                    tag: 'ai'
+                    status: 'ai'
                 },
                 sellingPoints: [],
                 timestamps: [],
@@ -760,33 +771,42 @@
                         // JSON解析成功
                         newProject.corePosition = {
                             content: result.corePosition || '请编辑核心定位',
-                            confirmed: false,
-                            tag: 'ai'
+                            status: 'ai'
                         };
                         
                         newProject.sellingPoints = (result.sellingPoints || []).map((sp, idx) => ({
-                            id: 'sp' + (idx + 1),
-                            content: typeof sp === 'string' ? sp : sp.content || sp,
-                            confirmed: false,
-                            tag: 'ai'
+                            id: idx + 1,
+                            content: typeof sp === 'string' ? sp : sp.content || String(sp),
+                            status: 'ai'
                         }));
                         
                         newProject.timestamps = (result.timestamps || []).map((ts, idx) => ({
-                            id: 'ts' + (idx + 1),
+                            id: idx + 1,
                             time: ts.time || '00:00',
-                            content: ts.content || ts.description || ts,
-                            confirmed: false,
-                            tag: 'ai'
+                            description: ts.content || ts.description || (typeof ts === 'string' ? ts : '精彩片段'),
+                            usage: ts.usage || '短视频/封面',
+                            status: 'ai',
+                            seconds: parseTimeToSeconds(ts.time || '00:00')
                         }));
                         
                         newProject.cautions = (result.cautions || []).map((ca, idx) => ({
-                            id: 'ca' + (idx + 1),
-                            content: typeof ca === 'string' ? ca : ca.content || ca,
-                            confirmed: false,
-                            tag: 'ai'
+                            id: idx + 1,
+                            content: typeof ca === 'string' ? ca : ca.content || String(ca),
+                            level: ca.level || 'medium',
+                            action: ca.action || '需确认',
+                            status: 'ai'
                         }));
                         
                         newProject.aiSummary = result.summary || rawContent || '';
+                        
+                        // 解析字幕数据
+                        if (result.transcript && Array.isArray(result.transcript)) {
+                            newProject.transcript = result.transcript.map(t => ({
+                                time: t.time || '00:00',
+                                text: t.text || t.content || '',
+                                seconds: parseTimeToSeconds(t.time || '00:00')
+                            }));
+                        }
                         
                         showToast('AI分析完成！');
                     } else {
@@ -795,12 +815,11 @@
                         newProject.aiSummary = rawContent || JSON.stringify(result) || 'AI分析完成，请查看原始内容';
                         newProject.corePosition = {
                             content: rawContent ? '请根据右侧AI总结手动填写' : '请编辑核心定位',
-                            confirmed: false,
-                            tag: 'ai'
+                            status: 'ai'
                         };
-                        newProject.sellingPoints = [{ id: 'sp1', content: '请根据AI总结提取卖点', confirmed: false, tag: 'ai' }];
-                        newProject.timestamps = [{ id: 'ts1', time: '00:00', content: '请根据AI总结添加时间点', confirmed: false, tag: 'ai' }];
-                        newProject.cautions = [{ id: 'ca1', content: '请根据AI总结添加注意事项', confirmed: false, tag: 'ai' }];
+                        newProject.sellingPoints = [{ id: 1, content: '请根据AI总结提取卖点', status: 'ai' }];
+                        newProject.timestamps = [{ id: 1, time: '00:00', description: '请根据AI总结添加时间点', usage: '待定', status: 'ai', seconds: 0 }];
+                        newProject.cautions = [{ id: 1, content: '请根据AI总结添加注意事项', level: 'medium', action: '需确认', status: 'ai' }];
                         showToast('分析完成，AI返回格式需手动整理');
                     }
                 } else {
@@ -820,13 +839,13 @@
             
             // 确保至少有一条数据
             if (newProject.sellingPoints.length === 0) {
-                newProject.sellingPoints = [{ id: 'sp1', content: '请添加卖点', confirmed: false, tag: 'ai' }];
+                newProject.sellingPoints = [{ id: 1, content: '请添加卖点', status: 'ai' }];
             }
             if (newProject.timestamps.length === 0) {
-                newProject.timestamps = [{ id: 'ts1', time: '00:00', content: '视频开始', confirmed: false, tag: 'ai' }];
+                newProject.timestamps = [{ id: 1, time: '00:00', description: '视频开始', usage: '开场', status: 'ai', seconds: 0 }];
             }
             if (newProject.cautions.length === 0) {
-                newProject.cautions = [{ id: 'ca1', content: '请添加注意事项', confirmed: false, tag: 'ai' }];
+                newProject.cautions = [{ id: 1, content: '请添加注意事项', level: 'low', action: '待确认', status: 'ai' }];
             }
             
             // 保存项目到 localStorage

@@ -29,7 +29,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: '缺少API Key' });
         }
 
-        // 构建提示词（包含时序感知）
+        // 构建提示词（包含时序感知和字幕提取）
         const analysisPrompt = prompt || `你是一个专业的视频内容分析助手。请仔细观看这个视频，分析视频时序和内容，然后提取以下信息：
 
 1. 核心定位：用一句话概括视频的核心信息、目标受众和主要价值
@@ -42,6 +42,7 @@ export default async function handler(req, res) {
    - 总结/结尾片段
 4. 注意事项/风险点：列出可能引发争议、需要说明或运营需注意的内容风险点
 5. 内容总结：用2-3句话概括视频的主要内容和价值
+6. 字幕转录：【重要】请根据视频中的语音，提取关键段落的字幕内容，每段包含时间点和对应的台词/旁白
 
 【重要】你必须严格按照以下JSON格式返回，不要有任何其他文字、解释或markdown标记：
 {
@@ -52,7 +53,12 @@ export default async function handler(req, res) {
         {"time": "01:30", "content": "精彩片段描述"}
     ],
     "cautions": ["注意事项1", "注意事项2"],
-    "summary": "视频内容总结，包含主题、亮点和整体评价"
+    "summary": "视频内容总结，包含主题、亮点和整体评价",
+    "transcript": [
+        {"time": "00:00", "text": "大家好，欢迎来到..."},
+        {"time": "00:30", "text": "今天我们来聊聊..."},
+        {"time": "01:00", "text": "这款产品的特点是..."}
+    ]
 }`;
 
         console.log('准备调用火山引擎API，视频URL:', videoUrl, '文件ID:', fileId);
