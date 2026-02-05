@@ -48,29 +48,32 @@ export default async function handler(req, res) {
 
         console.log('准备调用火山引擎API，视频URL:', videoUrl);
         
-        // 调用火山引擎API
+        // 调用火山引擎API（使用 chat/completions 端点）
         const requestBody = {
             model: 'doubao-1-5-vision-pro-32k-250115',
-            input: [
+            messages: [
                 {
                     role: 'user',
                     content: [
                         {
-                            type: 'input_video',
-                            video_url: videoUrl
+                            type: 'video_url',
+                            video_url: {
+                                url: videoUrl
+                            }
                         },
                         {
-                            type: 'input_text',
+                            type: 'text',
                             text: analysisPrompt
                         }
                     ]
                 }
-            ]
+            ],
+            max_tokens: 4096
         };
         
         console.log('请求体:', JSON.stringify(requestBody, null, 2));
         
-        const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/responses', {
+        const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
