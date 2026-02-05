@@ -48,32 +48,31 @@ export default async function handler(req, res) {
 
         console.log('准备调用火山引擎API，视频URL:', videoUrl);
         
-        // 调用火山引擎API（使用 chat/completions 端点）
+        // 调用火山引擎API（使用 /api/v3/responses 端点 + input 格式）
+        // 参考官方文档：https://www.volcengine.com/docs/82379/1895586
         const requestBody = {
-            model: 'doubao-1-5-vision-pro-32k-250115',
-            messages: [
+            model: 'doubao-seed-1-6-251015',
+            input: [
                 {
                     role: 'user',
                     content: [
                         {
-                            type: 'video_url',
-                            video_url: {
-                                url: videoUrl
-                            }
+                            type: 'input_video',
+                            video_url: videoUrl,
+                            fps: 1
                         },
                         {
-                            type: 'text',
+                            type: 'input_text',
                             text: analysisPrompt
                         }
                     ]
                 }
-            ],
-            max_tokens: 4096
+            ]
         };
         
         console.log('请求体:', JSON.stringify(requestBody, null, 2));
         
-        const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+        const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/responses', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
