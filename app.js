@@ -86,7 +86,9 @@ function initAllProjectsData() {
             deliveredAt: null,
             archivedAt: null,
             isReal: true,
-            videoSrc: "硬刚索尼？22999元佳能C50上手 - 1.2025-12-04_佳能C50评测_3840x2160_V05_Bilib(Av115665734338931,P1) (1).mp4",
+            // 视频托管说明：将视频上传到视频平台或对象存储后，替换下方URL
+            // 本地演示时可改回本地文件名
+            videoSrc: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
             
             corePosition: {
                 content: "面向专业视频创作者的\"回本神器\"，主打性价比和可靠性，适合需要稳定干活的内容团队。",
