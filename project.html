@@ -1089,12 +1089,29 @@
                 return;
             }
             
-            container.innerHTML = projectData.transcript.map(line => `
-                <div class="transcript-line" data-seconds="${line.seconds}">
-                    <span class="transcript-time">${line.time}</span>
-                    <span class="transcript-text">${line.text}</span>
-                </div>
-            `).join('');
+            container.innerHTML = projectData.transcript.map(line => {
+                // 兼容不同格式的字幕数据
+                const time = line.time || '00:00';
+                const text = line.text || line.content || line;
+                const seconds = line.seconds || parseTimeToSeconds(time);
+                return `
+                    <div class="transcript-line" data-seconds="${seconds}">
+                        <span class="transcript-time">${time}</span>
+                        <span class="transcript-text">${typeof text === 'string' ? text : JSON.stringify(text)}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function parseTimeToSeconds(time) {
+            if (!time) return 0;
+            const parts = time.split(':');
+            if (parts.length === 2) {
+                return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+            } else if (parts.length === 3) {
+                return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
+            }
+            return 0;
         }
         
         function renderNotes() {
@@ -1125,20 +1142,36 @@
             }
             
             const s = projectData.aiSummary;
-            container.innerHTML = `
-                <div class="note-item">
-                    <div class="note-header">
-                        <span class="note-author">🤖 AI 总结</span>
+            
+            // 支持字符串格式和对象格式
+            if (typeof s === 'string') {
+                container.innerHTML = `
+                    <div class="note-item">
+                        <div class="note-header">
+                            <span class="note-author">🤖 AI 总结</span>
+                        </div>
+                        <div class="note-content" style="white-space: pre-wrap;">
+                            ${s}
+                        </div>
                     </div>
-                    <div class="note-content">
-                        <p><strong>视频主题：</strong>${s.topic}</p>
-                        <p style="margin-top: 8px;"><strong>核心观点：</strong>${s.core}</p>
-                        <p style="margin-top: 8px;"><strong>亮点功能：</strong>${s.highlights}</p>
-                        <p style="margin-top: 8px;"><strong>主要不足：</strong>${s.weaknesses}</p>
-                        <p style="margin-top: 8px;"><strong>适合人群：</strong>${s.audience}</p>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="note-item">
+                        <div class="note-header">
+                            <span class="note-author">🤖 AI 总结</span>
+                        </div>
+                        <div class="note-content">
+                            ${s.topic ? `<p><strong>视频主题：</strong>${s.topic}</p>` : ''}
+                            ${s.core ? `<p style="margin-top: 8px;"><strong>核心观点：</strong>${s.core}</p>` : ''}
+                            ${s.highlights ? `<p style="margin-top: 8px;"><strong>亮点功能：</strong>${s.highlights}</p>` : ''}
+                            ${s.weaknesses ? `<p style="margin-top: 8px;"><strong>主要不足：</strong>${s.weaknesses}</p>` : ''}
+                            ${s.audience ? `<p style="margin-top: 8px;"><strong>适合人群：</strong>${s.audience}</p>` : ''}
+                            ${s.summary ? `<p style="margin-top: 8px;">${s.summary}</p>` : ''}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+            }
         }
         
         function renderTimelineMarkers() {

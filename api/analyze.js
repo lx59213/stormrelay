@@ -19,35 +19,60 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { videoUrl, prompt, apiKey } = req.body;
+        const { videoUrl, fileId, prompt, apiKey } = req.body;
 
         // 验证参数
-        if (!videoUrl) {
-            return res.status(400).json({ error: '缺少视频URL' });
+        if (!videoUrl && !fileId) {
+            return res.status(400).json({ error: '缺少视频URL或文件ID' });
         }
         if (!apiKey) {
             return res.status(400).json({ error: '缺少API Key' });
         }
 
-        // 构建提示词
-        const analysisPrompt = prompt || `你是一个视频内容分析助手。请仔细观看这个视频，然后提取以下信息：
+        // 构建提示词（包含时序感知）
+        const analysisPrompt = prompt || `你是一个专业的视频内容分析助手。请仔细观看这个视频，分析视频时序和内容，然后提取以下信息：
 
-1. 核心定位：用一句话概括视频的核心信息和目标受众
-2. 核心卖点：列出3-5个关键卖点
-3. 关键时间点：列出3-5个适合截取短视频或封面的精彩片段（包含时间和描述）
-4. 注意事项：列出可能引发争议或需要说明的风险点
-5. 内容总结：用2-3句话总结视频内容
+1. 核心定位：用一句话概括视频的核心信息、目标受众和主要价值
+2. 核心卖点：列出3-5个关键卖点或亮点
+3. 关键时间点：【重要】请根据视频时序，列出5-8个精彩片段的具体时间点（格式如"01:30"），包括：
+   - 开场/hook片段
+   - 核心产品/功能展示时刻
+   - 精彩演示或对比画面
+   - 适合做封面或短视频的高光时刻
+   - 总结/结尾片段
+4. 注意事项/风险点：列出可能引发争议、需要说明或运营需注意的内容风险点
+5. 内容总结：用2-3句话概括视频的主要内容和价值
 
-【重要】你必须且只能返回以下JSON格式，不要有任何其他文字：
+【重要】你必须严格按照以下JSON格式返回，不要有任何其他文字、解释或markdown标记：
 {
-    "corePosition": "一句话核心定位",
-    "sellingPoints": ["卖点1", "卖点2", "卖点3"],
-    "timestamps": [{"time": "01:30", "content": "精彩片段描述"}],
+    "corePosition": "一句话核心定位，说明视频主题、目标受众和核心价值",
+    "sellingPoints": ["卖点1", "卖点2", "卖点3", "卖点4"],
+    "timestamps": [
+        {"time": "00:00", "content": "开场"},
+        {"time": "01:30", "content": "精彩片段描述"}
+    ],
     "cautions": ["注意事项1", "注意事项2"],
-    "summary": "视频内容总结"
+    "summary": "视频内容总结，包含主题、亮点和整体评价"
 }`;
 
-        console.log('准备调用火山引擎API，视频URL:', videoUrl);
+        console.log('准备调用火山引擎API，视频URL:', videoUrl, '文件ID:', fileId);
+        
+        // 构建视频内容（支持URL和file_id两种方式）
+        let videoContent;
+        if (fileId) {
+            // 使用文件ID方式（通过Files API上传的文件）
+            videoContent = {
+                type: 'input_video',
+                file_id: fileId
+            };
+        } else {
+            // 使用URL方式
+            videoContent = {
+                type: 'input_video',
+                video_url: videoUrl,
+                fps: 1
+            };
+        }
         
         // 调用火山引擎API（使用 /api/v3/responses 端点 + input 格式）
         // 参考官方文档：https://www.volcengine.com/docs/82379/1895586
@@ -57,11 +82,7 @@ export default async function handler(req, res) {
                 {
                     role: 'user',
                     content: [
-                        {
-                            type: 'input_video',
-                            video_url: videoUrl,
-                            fps: 1
-                        },
+                        videoContent,
                         {
                             type: 'input_text',
                             text: analysisPrompt

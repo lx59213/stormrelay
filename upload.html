@@ -411,7 +411,7 @@
                                 <div id="uploadPlaceholder">
                                     <div class="upload-zone-icon">📹</div>
                                     <div class="upload-zone-text">点击或拖拽视频到此处</div>
-                                    <div class="upload-zone-hint">支持 MP4、MOV 格式，单文件 ≤50MB</div>
+                                    <div class="upload-zone-hint">支持 MP4、MOV 格式，最大 512MB</div>
                                 </div>
                                 <div id="filePreview" class="file-preview" style="display: none;">
                                     <span class="file-preview-icon">🎬</span>
@@ -549,14 +549,21 @@
         });
         
         function handleFile(file) {
-            if (file.size > 50 * 1024 * 1024) {
-                showToast('文件大小超过50MB限制');
+            // 最大支持 512MB
+            if (file.size > 512 * 1024 * 1024) {
+                showToast('文件大小超过512MB限制');
                 return;
             }
             
             if (!file.type.match(/video\/(mp4|quicktime)/)) {
                 showToast('请上传 MP4 或 MOV 格式');
                 return;
+            }
+            
+            // 检查是否超过 Vercel 请求体限制（约4MB）
+            if (file.size > 4 * 1024 * 1024) {
+                showToast('大文件请使用URL方式上传（先上传到云存储）', 5000);
+                // 仍然允许选择，但提示用户
             }
             
             selectedFile = file;
@@ -587,6 +594,20 @@
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        // 文件转 Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    // 移除 data:video/mp4;base64, 前缀
+                    const base64 = reader.result.split(',')[1];
+                    resolve(base64);
+                };
+                reader.onerror = error => reject(error);
+            });
         }
         
         // 开始分析
@@ -646,10 +667,68 @@
             };
             
             try {
+                let analyzeVideoUrl = videoUrl;
+                let analyzeFileId = null;
+                
+                // 如果选择了本地文件
+                if (selectedFile && !videoUrl) {
+                    // 检查文件大小
+                    if (selectedFile.size > 4 * 1024 * 1024) {
+                        // 大文件：提示用户使用URL方式
+                        document.getElementById('loadingOverlay').classList.add('hidden');
+                        showToast('大于4MB的文件请先上传到云存储（如腾讯云COS），然后使用URL方式分析', 6000);
+                        return;
+                    }
+                    
+                    // 小文件：通过 Files API 上传
+                    document.querySelector('.loading-text').textContent = '正在上传视频到云端...';
+                    document.querySelector('.loading-hint').textContent = '这可能需要一些时间，请勿关闭页面';
+                    
+                    try {
+                        // 转换为 Base64
+                        const fileBase64 = await fileToBase64(selectedFile);
+                        
+                        console.log('开始上传文件到 Files API...');
+                        const uploadResponse = await fetch('/api/upload', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                apiKey: apiKey,
+                                fileBase64: fileBase64,
+                                fileName: selectedFile.name,
+                                mimeType: selectedFile.type
+                            })
+                        });
+                        
+                        const uploadData = await uploadResponse.json();
+                        console.log('文件上传响应:', uploadData);
+                        
+                        if (uploadData.success && uploadData.fileId) {
+                            analyzeFileId = uploadData.fileId;
+                            console.log('文件上传成功，fileId:', analyzeFileId);
+                            
+                            // 等待文件处理完成
+                            document.querySelector('.loading-text').textContent = '视频处理中...';
+                            document.querySelector('.loading-hint').textContent = '火山引擎正在预处理视频帧';
+                            await new Promise(resolve => setTimeout(resolve, 3000));
+                        } else {
+                            throw new Error(uploadData.error || '文件上传失败');
+                        }
+                    } catch (uploadError) {
+                        console.error('文件上传错误:', uploadError);
+                        document.getElementById('loadingOverlay').classList.add('hidden');
+                        showToast('文件上传失败: ' + uploadError.message);
+                        return;
+                    }
+                }
+                
                 // 调用真实API分析
+                document.querySelector('.loading-text').textContent = 'AI 正在分析视频内容...';
                 document.querySelector('.loading-hint').textContent = '正在调用AI分析接口，视频越长耗时越久...';
                 
-                console.log('开始调用API，视频URL:', videoUrl);
+                console.log('开始调用API，视频URL:', analyzeVideoUrl, '文件ID:', analyzeFileId);
                 
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
@@ -657,7 +736,8 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        videoUrl: videoUrl,
+                        videoUrl: analyzeVideoUrl,
+                        fileId: analyzeFileId,
                         apiKey: apiKey
                     })
                 });

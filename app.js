@@ -495,7 +495,7 @@ function resetAllData() {
 // ========================================
 // Toast提示
 // ========================================
-function showToast(message) {
+function showToast(message, duration = 3000) {
     let toast = document.getElementById('toast');
     if (!toast) {
         toast = document.createElement('div');
@@ -505,7 +505,7 @@ function showToast(message) {
     }
     toast.textContent = message;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
+    setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 // ========================================

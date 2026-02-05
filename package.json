@@ -1,0 +1,9 @@
+{
+  "name": "stormrelay",
+  "version": "1.0.0",
+  "description": "飓风接力 - 影视飓风内部效率工具",
+  "private": true,
+  "dependencies": {
+    "form-data": "^4.0.0"
+  }
+}
