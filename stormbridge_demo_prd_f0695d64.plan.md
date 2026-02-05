@@ -32,6 +32,12 @@ todos:
   - id: efficiency-chart
     content: 效率交接折线图和数据表格可视化
     status: completed
+  - id: brand-easter-egg
+    content: 品牌彩蛋（HKRR原则、logo、slogan）
+    status: completed
+  - id: real-api-integration
+    content: 真实API集成（火山引擎视频理解）
+    status: completed
 isProject: false
 ---
 
@@ -1232,3 +1238,70 @@ white background, vector style, 64x64px
 3. **线条风格**：2-3px 线宽，边角可适度圆角
 4. **输出格式**：PNG 带透明背景，或 SVG 矢量格式
 5. **替换方式**：将生成的图标保存到 `icon/` 文件夹，然后在 CSS 中用 `background-image` 或 `<img>` 标签引用
+
+---
+
+## 十五、后端API集成
+
+### 15.1 技术架构
+
+```
+┌────────────────┐      ┌──────────────────┐      ┌────────────────────┐
+│   前端页面      │ ──→  │  Vercel Function  │ ──→  │  火山引擎视频API   │
+│  (upload.html)  │      │  (/api/analyze)   │      │  (doubao-vision)   │
+└────────────────┘      └──────────────────┘      └────────────────────┘
+```
+
+### 15.2 API文件结构
+
+```
+api/
+└── analyze.js    # Vercel Serverless Function
+```
+
+### 15.3 API功能说明
+
+**接口**：`POST /api/analyze`
+
+**请求参数**：
+```json
+{
+    "videoUrl": "https://example.com/video.mp4",
+    "apiKey": "用户配置的火山引擎API Key"
+}
+```
+
+**返回格式**：
+```json
+{
+    "success": true,
+    "result": {
+        "corePosition": "核心定位",
+        "sellingPoints": ["卖点1", "卖点2"],
+        "timestamps": [{"time": "00:30", "content": "描述"}],
+        "cautions": ["注意事项"],
+        "summary": "AI总结"
+    }
+}
+```
+
+### 15.4 视频URL限制
+
+| 来源 | 可用性 | 说明 |
+|------|--------|------|
+| 腾讯云COS | ✅ | 需设置公有读 |
+| 阿里云OSS | ✅ | 需设置公开访问 |
+| 自建服务器 | ✅ | 需公网可访问 |
+| B站/YouTube | ❌ | 防盗链限制 |
+| 微信/抖音 | ❌ | 需登录验证 |
+
+### 15.5 测试视频
+
+公开测试视频URL（佳能C50评测）：
+```
+https://stormrelay-1335848641.cos.ap-guangzhou.myqcloud.com/硬刚索尼？22999元佳能C50上手 - 1.2025-12-04_佳能C50评测_3840x2160_V05_Bilib(Av115665734338931,P1) (1).mp4
+```
+
+### 15.6 部署说明
+
+项目部署在 Vercel 上时，`api/` 文件夹会自动被识别为 Serverless Functions，无需额外配置服务器。

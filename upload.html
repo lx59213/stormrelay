@@ -619,17 +619,124 @@
             
             // 显示加载
             document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.querySelector('.loading-text').textContent = 'AI 正在分析视频内容...';
             
-            // 模拟分析过程
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // 创建项目
+            // 创建项目ID
             const projectId = 'proj-' + Date.now();
-            showToast('分析完成，正在跳转...');
+            
+            // 默认项目数据（分析失败时使用）
+            let newProject = {
+                id: projectId,
+                title: title,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                videoSrc: videoUrl || null,
+                corePosition: {
+                    content: 'AI分析中...',
+                    confirmed: false,
+                    tag: 'ai'
+                },
+                sellingPoints: [],
+                timestamps: [],
+                cautions: [],
+                notes: '',
+                transcript: script ? [{ time: '00:00', text: script }] : [],
+                aiSummary: ''
+            };
+            
+            try {
+                // 调用真实API分析
+                document.querySelector('.loading-hint').textContent = '正在调用AI分析接口，视频越长耗时越久...';
+                
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        videoUrl: videoUrl,
+                        apiKey: apiKey
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.result) {
+                    const result = data.result;
+                    
+                    // 解析AI返回的结果
+                    if (!result.parseError) {
+                        newProject.corePosition = {
+                            content: result.corePosition || '请编辑核心定位',
+                            confirmed: false,
+                            tag: 'ai'
+                        };
+                        
+                        newProject.sellingPoints = (result.sellingPoints || []).map((sp, idx) => ({
+                            id: 'sp' + (idx + 1),
+                            content: typeof sp === 'string' ? sp : sp.content || sp,
+                            confirmed: false,
+                            tag: 'ai'
+                        }));
+                        
+                        newProject.timestamps = (result.timestamps || []).map((ts, idx) => ({
+                            id: 'ts' + (idx + 1),
+                            time: ts.time || '00:00',
+                            content: ts.content || ts.description || ts,
+                            confirmed: false,
+                            tag: 'ai'
+                        }));
+                        
+                        newProject.cautions = (result.cautions || []).map((ca, idx) => ({
+                            id: 'ca' + (idx + 1),
+                            content: typeof ca === 'string' ? ca : ca.content || ca,
+                            confirmed: false,
+                            tag: 'ai'
+                        }));
+                        
+                        newProject.aiSummary = result.summary || data.rawContent || '';
+                        
+                        showToast('AI分析完成！');
+                    } else {
+                        // JSON解析失败，使用原始文本
+                        newProject.aiSummary = data.rawContent || 'AI分析完成，请手动整理信息';
+                        newProject.corePosition.content = '请根据AI总结手动填写核心定位';
+                        showToast('分析完成，请手动整理信息');
+                    }
+                } else {
+                    // API调用失败
+                    console.error('API错误:', data);
+                    newProject.aiSummary = `API调用失败: ${data.error || '未知错误'}\n${data.detail || ''}`;
+                    showToast('API调用失败，使用默认数据');
+                }
+                
+            } catch (error) {
+                console.error('分析出错:', error);
+                newProject.aiSummary = `分析出错: ${error.message}`;
+                showToast('分析出错，使用默认数据');
+            }
+            
+            // 确保至少有一条数据
+            if (newProject.sellingPoints.length === 0) {
+                newProject.sellingPoints = [{ id: 'sp1', content: '请添加卖点', confirmed: false, tag: 'ai' }];
+            }
+            if (newProject.timestamps.length === 0) {
+                newProject.timestamps = [{ id: 'ts1', time: '00:00', content: '视频开始', confirmed: false, tag: 'ai' }];
+            }
+            if (newProject.cautions.length === 0) {
+                newProject.cautions = [{ id: 'ca1', content: '请添加注意事项', confirmed: false, tag: 'ai' }];
+            }
+            
+            // 保存项目到 localStorage
+            const allProjects = getAllProjects();
+            allProjects.unshift(newProject);
+            saveAllProjects(allProjects);
+            
+            document.getElementById('loadingOverlay').classList.add('hidden');
             
             setTimeout(() => {
                 window.location.href = `project.html?id=${projectId}`;
-            }, 1000);
+            }, 500);
         });
         
         // 初始化

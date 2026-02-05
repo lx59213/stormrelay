@@ -1,4 +1,5 @@
-# 大文件（Cloudflare Pages 限制 25MB）
+# 大视频文件（使用外链托管）
+# 如需本地测试，可注释下面几行
 *.mp4
 *.mov
 *.avi
@@ -15,3 +16,11 @@ Thumbs.db
 # 备份文件
 *.bak
 *.backup
+
+# Node.js
+node_modules/
+.vercel/
+
+# 环境变量（敏感信息）
+.env
+.env.local
