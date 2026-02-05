@@ -46,39 +46,51 @@ export default async function handler(req, res) {
     "summary": "视频内容总结"
 }`;
 
-        // 调用火山引擎API（使用 /api/v3/responses 端点）
+        console.log('准备调用火山引擎API，视频URL:', videoUrl);
+        
+        // 调用火山引擎API
+        const requestBody = {
+            model: 'doubao-1-5-vision-pro-32k-250115',
+            input: [
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'input_video',
+                            video_url: videoUrl
+                        },
+                        {
+                            type: 'input_text',
+                            text: analysisPrompt
+                        }
+                    ]
+                }
+            ]
+        };
+        
+        console.log('请求体:', JSON.stringify(requestBody, null, 2));
+        
         const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/responses', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                model: 'doubao-1-5-vision-pro-32k-250115',
-                input: [
-                    {
-                        role: 'user',
-                        content: [
-                            {
-                                type: 'input_video',
-                                video_url: videoUrl
-                            },
-                            {
-                                type: 'input_text',
-                                text: analysisPrompt
-                            }
-                        ]
-                    }
-                ]
-            })
+            body: JSON.stringify(requestBody)
         });
 
+        console.log('火山引擎API响应状态:', response.status);
+        
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('API错误:', errorText);
-            return res.status(response.status).json({ 
-                error: `API调用失败: ${response.status}`,
-                detail: errorText
+            console.error('火山引擎API错误:', response.status, errorText);
+            return res.status(200).json({ 
+                success: false,
+                error: `火山引擎API调用失败: ${response.status}`,
+                detail: errorText,
+                hint: response.status === 401 ? '请检查API Key是否正确' : 
+                      response.status === 400 ? '请检查视频URL是否有效' :
+                      response.status === 413 ? '视频文件过大' : '请检查网络连接'
             });
         }
 

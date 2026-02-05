@@ -1144,6 +1144,11 @@
         function renderTimelineMarkers() {
             const container = document.getElementById('timelineBar');
             
+            // 防护检查：确保有时长数据
+            if (!projectData.duration) {
+                projectData.duration = '10:00'; // 默认10分钟
+            }
+            
             if (!projectData.timestamps || projectData.timestamps.length === 0) {
                 container.innerHTML = '';
                 return;

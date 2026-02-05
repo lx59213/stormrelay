@@ -631,6 +631,7 @@
                 status: 'pending',
                 createdAt: new Date().toISOString(),
                 videoSrc: videoUrl || null,
+                duration: '10:00',  // 默认时长，会在视频加载后更新
                 corePosition: {
                     content: 'AI分析中...',
                     confirmed: false,
@@ -648,6 +649,8 @@
                 // 调用真实API分析
                 document.querySelector('.loading-hint').textContent = '正在调用AI分析接口，视频越长耗时越久...';
                 
+                console.log('开始调用API，视频URL:', videoUrl);
+                
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: {
@@ -659,7 +662,9 @@
                     })
                 });
                 
+                console.log('API响应状态:', response.status);
                 const data = await response.json();
+                console.log('API返回数据:', data);
                 
                 if (data.success && data.result) {
                     const result = data.result;
@@ -706,8 +711,10 @@
                 } else {
                     // API调用失败
                     console.error('API错误:', data);
-                    newProject.aiSummary = `API调用失败: ${data.error || '未知错误'}\n${data.detail || ''}`;
-                    showToast('API调用失败，使用默认数据');
+                    const errorMsg = data.error || '未知错误';
+                    const hint = data.hint || '';
+                    newProject.aiSummary = `API调用失败: ${errorMsg}\n${hint}\n\n详情: ${data.detail || '无'}`;
+                    showToast(`API调用失败: ${hint || errorMsg}`);
                 }
                 
             } catch (error) {
