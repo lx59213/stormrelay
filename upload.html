@@ -666,11 +666,18 @@
                 const data = await response.json();
                 console.log('API返回数据:', data);
                 
-                if (data.success && data.result) {
-                    const result = data.result;
+                console.log('完整API返回:', data);
+                
+                if (data.success) {
+                    const result = data.result || {};
+                    const rawContent = data.rawContent || '';
+                    
+                    console.log('解析结果:', result);
+                    console.log('原始内容:', rawContent);
                     
                     // 解析AI返回的结果
-                    if (!result.parseError) {
+                    if (result && !result.parseError && result.corePosition) {
+                        // JSON解析成功
                         newProject.corePosition = {
                             content: result.corePosition || '请编辑核心定位',
                             confirmed: false,
@@ -699,14 +706,22 @@
                             tag: 'ai'
                         }));
                         
-                        newProject.aiSummary = result.summary || data.rawContent || '';
+                        newProject.aiSummary = result.summary || rawContent || '';
                         
                         showToast('AI分析完成！');
                     } else {
-                        // JSON解析失败，使用原始文本
-                        newProject.aiSummary = data.rawContent || 'AI分析完成，请手动整理信息';
-                        newProject.corePosition.content = '请根据AI总结手动填写核心定位';
-                        showToast('分析完成，请手动整理信息');
+                        // JSON解析失败，但API调用成功，使用原始文本
+                        console.log('JSON解析失败，使用原始文本');
+                        newProject.aiSummary = rawContent || JSON.stringify(result) || 'AI分析完成，请查看原始内容';
+                        newProject.corePosition = {
+                            content: rawContent ? '请根据右侧AI总结手动填写' : '请编辑核心定位',
+                            confirmed: false,
+                            tag: 'ai'
+                        };
+                        newProject.sellingPoints = [{ id: 'sp1', content: '请根据AI总结提取卖点', confirmed: false, tag: 'ai' }];
+                        newProject.timestamps = [{ id: 'ts1', time: '00:00', content: '请根据AI总结添加时间点', confirmed: false, tag: 'ai' }];
+                        newProject.cautions = [{ id: 'ca1', content: '请根据AI总结添加注意事项', confirmed: false, tag: 'ai' }];
+                        showToast('分析完成，AI返回格式需手动整理');
                     }
                 } else {
                     // API调用失败

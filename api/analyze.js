@@ -30,18 +30,19 @@ export default async function handler(req, res) {
         }
 
         // 构建提示词
-        const analysisPrompt = prompt || `请分析这个视频，提取以下信息：
+        const analysisPrompt = prompt || `你是一个视频内容分析助手。请仔细观看这个视频，然后提取以下信息：
 
-1. 【核心定位】用一句话概括视频的核心信息和目标受众
-2. 【核心卖点】列出3-5个关键卖点
-3. 【关键时间点】列出适合截取短视频或封面的精彩片段时间点
-4. 【注意事项】列出可能引发争议或需要说明的风险点
+1. 核心定位：用一句话概括视频的核心信息和目标受众
+2. 核心卖点：列出3-5个关键卖点
+3. 关键时间点：列出3-5个适合截取短视频或封面的精彩片段（包含时间和描述）
+4. 注意事项：列出可能引发争议或需要说明的风险点
+5. 内容总结：用2-3句话总结视频内容
 
-请用JSON格式返回，格式如下：
+【重要】你必须且只能返回以下JSON格式，不要有任何其他文字：
 {
-    "corePosition": "核心定位内容",
+    "corePosition": "一句话核心定位",
     "sellingPoints": ["卖点1", "卖点2", "卖点3"],
-    "timestamps": [{"time": "00:30", "content": "描述"}],
+    "timestamps": [{"time": "01:30", "content": "精彩片段描述"}],
     "cautions": ["注意事项1", "注意事项2"],
     "summary": "视频内容总结"
 }`;
@@ -97,21 +98,37 @@ export default async function handler(req, res) {
         }
 
         const data = await response.json();
+        console.log('火山引擎API返回数据:', JSON.stringify(data, null, 2));
         
         // 提取AI回复（兼容不同的响应格式）
         let aiContent = '';
-        if (data.choices?.[0]?.message?.content) {
-            // chat/completions 格式
+        
+        // Responses API 格式: data.output[].content[].text
+        if (data.output && Array.isArray(data.output)) {
+            for (const outputItem of data.output) {
+                if (outputItem.content && Array.isArray(outputItem.content)) {
+                    for (const contentItem of outputItem.content) {
+                        if (contentItem.type === 'output_text' && contentItem.text) {
+                            aiContent += contentItem.text;
+                        } else if (contentItem.text) {
+                            aiContent += contentItem.text;
+                        }
+                    }
+                } else if (typeof outputItem.content === 'string') {
+                    aiContent += outputItem.content;
+                }
+            }
+        }
+        // Chat API 格式: data.choices[].message.content
+        else if (data.choices?.[0]?.message?.content) {
             aiContent = data.choices[0].message.content;
-        } else if (data.output?.[0]?.content) {
-            // responses 格式
-            aiContent = data.output[0].content.map(c => c.text || '').join('\n');
-        } else if (data.output) {
-            // 其他格式
-            aiContent = typeof data.output === 'string' ? data.output : JSON.stringify(data.output);
-        } else {
+        }
+        // 兜底
+        else {
             aiContent = JSON.stringify(data);
         }
+        
+        console.log('提取的AI内容:', aiContent);
         
         // 尝试解析JSON（AI可能返回带markdown的JSON）
         let parsedResult = null;
