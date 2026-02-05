@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飓风接力 · 项目列表</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .status-archived {
+            background: #F3F4F6 !important;
+            color: #6B7280 !important;
+        }
+        .tag-archived {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+        .reset-btn {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: #FEE2E2;
+            color: #DC2626;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .reset-btn:hover {
+            background: #FECACA;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="workspace-selector">
+                    <div class="workspace-info">
+                        <div class="workspace-top">
+                            <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
+                            <span class="workspace-name">飓风接力</span>
+                        </div>
+                        <span class="workspace-slogan">无限进步</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <a href="index.html" class="sidebar-item active" id="navAll">
+                        <span class="sidebar-item-icon">📋</span>
+                        <span>所有项目</span>
+                    </a>
+                    <a href="upload.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">➕</span>
+                        <span>新建项目</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目状态</div>
+                    <a href="index.html?filter=pending" class="sidebar-item" id="navPending">
+                        <span class="sidebar-item-icon">✂️</span>
+                        <span>待剪辑确认</span>
+                        <span class="sidebar-item-count" id="countPending">0</span>
+                    </a>
+                    <a href="index.html?filter=delivered" class="sidebar-item" id="navDelivered">
+                        <span class="sidebar-item-icon">📤</span>
+                        <span>已交付运营</span>
+                        <span class="sidebar-item-count" id="countDelivered">0</span>
+                    </a>
+                    <a href="index.html?filter=archived" class="sidebar-item" id="navArchived">
+                        <span class="sidebar-item-icon">📁</span>
+                        <span>已上线归档</span>
+                        <span class="sidebar-item-count" id="countArchived">0</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">数据沉淀</div>
+                    <a href="analytics.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📊</span>
+                        <span>内容分析</span>
+                    </a>
+                    <a href="knowledge.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">🧠</span>
+                        <span>知识图谱</span>
+                        <span class="sidebar-item-count">Beta</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <a href="settings.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">⚙️</span>
+                        <span>AI 配置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主工作区 -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="main-header-left">
+                    <h1 class="page-title" id="pageTitle">所有项目</h1>
+                    <div class="header-tabs">
+                        <button class="header-tab active" data-filter="all">全部</button>
+                        <button class="header-tab" data-filter="pending">待剪辑确认</button>
+                        <button class="header-tab" data-filter="delivered">已交付运营</button>
+                        <button class="header-tab" data-filter="archived">已上线归档</button>
+                    </div>
+                </div>
+                <div class="main-header-right">
+                    <a href="upload.html" class="btn btn-primary">
+                        <span>➕</span>
+                        <span>新建项目</span>
+                    </a>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <!-- 效率统计 -->
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <span class="stat-value" id="statTotal">0</span>
+                        <span class="stat-label">总项目</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">80%</span>
+                        <span class="stat-label">效率提升</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">6.2h</span>
+                        <span class="stat-label">本月节省</span>
+                    </div>
+                </div>
+                
+                <!-- 项目列表 -->
+                <div class="list-container">
+                    <div class="list-header">
+                        <div class="list-title">项目列表</div>
+                        <div class="list-actions">
+                            <button class="btn-icon" title="刷新数据" id="refreshBtn">🔄</button>
+                            <button class="reset-btn" title="重置演示数据" id="resetBtn">重置数据</button>
+                        </div>
+                    </div>
+                    
+                    <div id="projectList">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="app.js"></script>
+    <script>
+        // ========================================
+        // 首页逻辑
+        // ========================================
+        
+        let currentFilter = 'all';
+        
+        // 状态配置
+        const statusConfig = {
+            pending: {
+                label: '待剪辑确认',
+                icon: '✂️',
+                class: 'status-pending',
+                tagClass: 'tag-warning'
+            },
+            delivered: {
+                label: '已交付运营',
+                icon: '📤',
+                class: 'status-delivered',
+                tagClass: 'tag-success'
+            },
+            archived: {
+                label: '已上线归档',
+                icon: '📁',
+                class: 'status-archived',
+                tagClass: 'tag-archived'
+            }
+        };
+        
+        // 初始化
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const filter = urlParams.get('filter');
+            if (filter) {
+                currentFilter = filter;
+            }
+            
+            updateSidebarActive();
+            updateTabActive();
+            updatePageTitle();
+            renderProjects();
+            updateStats();
+        }
+        
+        // 更新侧边栏高亮
+        function updateSidebarActive() {
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const navMap = {
+                'all': 'navAll',
+                'pending': 'navPending',
+                'delivered': 'navDelivered',
+                'archived': 'navArchived'
+            };
+            
+            const navId = navMap[currentFilter];
+            if (navId) {
+                document.getElementById(navId).classList.add('active');
+            }
+        }
+        
+        // 更新Tab高亮
+        function updateTabActive() {
+            document.querySelectorAll('.header-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.filter === currentFilter) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+        
+        // 更新页面标题
+        function updatePageTitle() {
+            const titles = {
+                'all': '所有项目',
+                'pending': '待剪辑确认',
+                'delivered': '已交付运营',
+                'archived': '已上线归档'
+            };
+            document.getElementById('pageTitle').textContent = titles[currentFilter] || '所有项目';
+        }
+        
+        // 渲染项目列表
+        function renderProjects() {
+            const container = document.getElementById('projectList');
+            const allProjects = getAllProjects();
+            
+            let filtered = allProjects;
+            if (currentFilter !== 'all') {
+                filtered = allProjects.filter(p => p.status === currentFilter);
+            }
+            
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-tertiary);">该分类下暂无项目</div>';
+                return;
+            }
+            
+            container.innerHTML = filtered.map(project => {
+                const config = statusConfig[project.status];
+                const riskCount = project.cautions ? project.cautions.length : 0;
+                return `
+                <a href="project.html?id=${project.id}" class="project-item">
+                    <div class="project-item-status ${config.class}">
+                        ${config.icon}
+                    </div>
+                    <div class="project-item-content">
+                        <div class="project-item-title">${project.isReal ? '🎬 ' : ''}${project.title}</div>
+                        <div class="project-item-meta">
+                            <span>⏱️ ${project.duration}</span>
+                            <span>📅 ${project.createdAt}</span>
+                            <span>⚠️ ${riskCount}个风险</span>
+                        </div>
+                    </div>
+                    <div class="project-item-tags">
+                        <span class="tag ${config.tagClass}">${config.label}</span>
+                        ${project.isReal ? '<span class="tag tag-info">真实数据</span>' : ''}
+                    </div>
+                    <div class="project-item-arrow">→</div>
+                </a>
+            `}).join('');
+        }
+        
+        // 更新统计
+        function updateStats() {
+            const stats = getProjectStats();
+            
+            document.getElementById('countPending').textContent = stats.pending;
+            document.getElementById('countDelivered').textContent = stats.delivered;
+            document.getElementById('countArchived').textContent = stats.archived;
+            document.getElementById('statTotal').textContent = stats.total;
+        }
+        
+        // Tab点击事件
+        document.querySelectorAll('.header-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const filter = this.dataset.filter;
+                const url = filter === 'all' ? 'index.html' : `index.html?filter=${filter}`;
+                history.pushState({}, '', url);
+                
+                currentFilter = filter;
+                updateSidebarActive();
+                updateTabActive();
+                updatePageTitle();
+                renderProjects();
+            });
+        });
+        
+        // 刷新按钮
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            renderProjects();
+            updateStats();
+            showToast('已刷新');
+        });
+        
+        // 重置数据按钮
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if (confirm('确定要重置所有演示数据吗？这会将所有项目恢复到初始状态。')) {
+                resetAllData();
+                renderProjects();
+                updateStats();
+                showToast('数据已重置');
+            }
+        });
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>

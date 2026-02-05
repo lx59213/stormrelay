@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飓风接力 · 知识图谱</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="workspace-selector">
+                    <div class="workspace-info">
+                        <div class="workspace-top">
+                            <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
+                            <span class="workspace-name">飓风接力</span>
+                        </div>
+                        <span class="workspace-slogan">无限进步</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <a href="index.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📋</span>
+                        <span>所有项目</span>
+                    </a>
+                    <a href="upload.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">➕</span>
+                        <span>新建项目</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目状态</div>
+                    <a href="index.html?filter=pending" class="sidebar-item">
+                        <span class="sidebar-item-icon">✂️</span>
+                        <span>待剪辑确认</span>
+                        <span class="sidebar-item-count">3</span>
+                    </a>
+                    <a href="index.html?filter=delivered" class="sidebar-item">
+                        <span class="sidebar-item-icon">📤</span>
+                        <span>已交付运营</span>
+                        <span class="sidebar-item-count">2</span>
+                    </a>
+                    <a href="index.html?filter=archived" class="sidebar-item">
+                        <span class="sidebar-item-icon">📁</span>
+                        <span>已上线归档</span>
+                        <span class="sidebar-item-count">3</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">数据沉淀</div>
+                    <a href="analytics.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📊</span>
+                        <span>内容分析</span>
+                    </a>
+                    <a href="knowledge.html" class="sidebar-item active">
+                        <span class="sidebar-item-icon">🧠</span>
+                        <span>知识图谱</span>
+                        <span class="sidebar-item-count">Beta</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <a href="settings.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">⚙️</span>
+                        <span>AI 配置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主工作区 -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="main-header-left">
+                    <h1 class="page-title">知识图谱</h1>
+                    <span class="beta-badge">Beta</span>
+                </div>
+            </header>
+            
+            <div class="content-area">
+                <!-- Beta 提示 -->
+                <div class="beta-notice">
+                    <div class="beta-notice-icon">🧠</div>
+                    <div class="beta-notice-content">
+                        <h3>知识图谱功能开发中</h3>
+                        <p>
+                            我们正在构建一个强大的知识图谱系统，将所有项目的标注、
+                            关键词、风险点等信息关联起来，帮助团队发现内容规律、
+                            复用历史经验。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 规划功能 -->
+                <div class="feature-preview">
+                    <h2 class="feature-preview-title">即将推出</h2>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔗</div>
+                            <h4>关联发现</h4>
+                            <p>自动发现视频之间的关联，如同一产品、相似主题、共同风险点</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">📚</div>
+                            <h4>经验复用</h4>
+                            <p>基于历史数据推荐最佳实践，如"上次这个产品的XX卖点效果很好"</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <h4>智能提醒</h4>
+                            <p>基于知识图谱的风险预警，如"这个品牌之前有过XX争议"</p>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <div class="feature-icon">🔍</div>
+                            <h4>语义搜索</h4>
+                            <p>跨项目搜索相关内容，如"所有提到性价比的视频"</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 图谱预览 -->
+                <div class="graph-preview">
+                    <h2 class="feature-preview-title">图谱预览</h2>
+                    <div class="graph-placeholder">
+                        <svg width="100%" height="300" viewBox="0 0 600 300">
+                            <!-- 节点 -->
+                            <circle cx="300" cy="150" r="40" fill="#5E6AD2" opacity="0.8"/>
+                            <text x="300" y="155" text-anchor="middle" fill="white" font-size="12">佳能C50</text>
+                            
+                            <circle cx="150" cy="80" r="25" fill="#F59E0B" opacity="0.8"/>
+                            <text x="150" y="85" text-anchor="middle" fill="white" font-size="10">7K画质</text>
+                            
+                            <circle cx="450" cy="80" r="25" fill="#F59E0B" opacity="0.8"/>
+                            <text x="450" y="85" text-anchor="middle" fill="white" font-size="10">直播推流</text>
+                            
+                            <circle cx="150" cy="220" r="25" fill="#10B981" opacity="0.8"/>
+                            <text x="150" y="225" text-anchor="middle" fill="white" font-size="10">性价比</text>
+                            
+                            <circle cx="450" cy="220" r="25" fill="#EF4444" opacity="0.8"/>
+                            <text x="450" y="225" text-anchor="middle" fill="white" font-size="10">无防抖</text>
+                            
+                            <circle cx="80" cy="150" r="20" fill="#8B5CF6" opacity="0.6"/>
+                            <text x="80" y="155" text-anchor="middle" fill="white" font-size="9">Vlog</text>
+                            
+                            <circle cx="520" cy="150" r="20" fill="#8B5CF6" opacity="0.6"/>
+                            <text x="520" y="155" text-anchor="middle" fill="white" font-size="9">带货</text>
+                            
+                            <!-- 连线 -->
+                            <line x1="260" y1="130" x2="175" y2="95" stroke="#E8E8E8" stroke-width="2"/>
+                            <line x1="340" y1="130" x2="425" y2="95" stroke="#E8E8E8" stroke-width="2"/>
+                            <line x1="260" y1="170" x2="175" y2="205" stroke="#E8E8E8" stroke-width="2"/>
+                            <line x1="340" y1="170" x2="425" y2="205" stroke="#E8E8E8" stroke-width="2"/>
+                            <line x1="100" y1="150" x2="260" y2="150" stroke="#E8E8E8" stroke-width="1" stroke-dasharray="4"/>
+                            <line x1="340" y1="150" x2="500" y2="150" stroke="#E8E8E8" stroke-width="1" stroke-dasharray="4"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <style>
+        .beta-badge {
+            background: #8B5CF6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .beta-notice {
+            display: flex;
+            gap: 20px;
+            padding: 24px;
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+        
+        .beta-notice-icon {
+            font-size: 48px;
+        }
+        
+        .beta-notice-content h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .beta-notice-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        
+        .feature-preview {
+            margin-bottom: 32px;
+        }
+        
+        .feature-preview-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        
+        .feature-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+        
+        .feature-card h4 {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            line-height: 1.5;
+        }
+        
+        .graph-preview {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .graph-placeholder {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 1024px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .beta-notice {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+    
+    <script src="app.js"></script>
+</body>
+</html>

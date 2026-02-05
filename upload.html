@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飓风接力 · 新建项目</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 上传页专用样式 */
+        .upload-layout {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+        
+        /* 左侧：项目历史 */
+        .history-panel {
+            width: 280px;
+            background: var(--bg-white);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .history-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .history-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+        
+        .history-item {
+            display: block;
+            padding: 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: inherit;
+            margin-bottom: 4px;
+            transition: all 0.15s;
+        }
+        
+        .history-item:hover {
+            background: var(--bg-primary);
+        }
+        
+        .history-item-title {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .history-item-meta {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            display: flex;
+            gap: 8px;
+        }
+        
+        .history-item-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+        }
+        
+        .history-item-status.pending { background: var(--warning-color); }
+        .history-item-status.delivered { background: var(--success-color); }
+        
+        /* 右侧：上传区域 */
+        .upload-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .upload-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+        
+        .upload-card {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+        }
+        
+        .upload-card-title {
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .upload-card-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        /* 上传区域 */
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 24px;
+        }
+        
+        .upload-zone:hover {
+            border-color: var(--accent-color);
+            background: rgba(94, 106, 210, 0.02);
+        }
+        
+        .upload-zone.dragover {
+            border-color: var(--accent-color);
+            background: rgba(94, 106, 210, 0.05);
+        }
+        
+        .upload-zone.has-file {
+            border-style: solid;
+            border-color: var(--success-color);
+            background: var(--success-bg);
+        }
+        
+        .upload-zone-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        
+        .upload-zone-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .upload-zone-hint {
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+        
+        .file-preview {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .file-preview-icon {
+            font-size: 32px;
+        }
+        
+        .file-preview-info {
+            flex: 1;
+            text-align: left;
+        }
+        
+        .file-preview-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .file-preview-size {
+            font-size: 12px;
+            color: var(--text-tertiary);
+        }
+        
+        .file-preview-remove {
+            padding: 4px 8px;
+            font-size: 12px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        /* 或者分隔 */
+        .upload-divider {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            color: var(--text-tertiary);
+            font-size: 13px;
+        }
+        
+        .upload-divider::before,
+        .upload-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-color);
+        }
+        
+        /* URL输入 */
+        .url-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+        
+        .url-input {
+            flex: 1;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .url-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        /* 标题输入 */
+        .title-section {
+            margin-bottom: 24px;
+        }
+        
+        .title-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        
+        .title-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        /* 文案区域 */
+        .script-section {
+            margin-bottom: 24px;
+        }
+        
+        .script-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+        
+        .script-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        /* 操作按钮 */
+        .upload-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .section-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .section-hint {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        
+        @media (max-width: 768px) {
+            .history-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="workspace-selector">
+                    <div class="workspace-info">
+                        <div class="workspace-top">
+                            <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
+                            <span class="workspace-name">飓风接力</span>
+                        </div>
+                        <span class="workspace-slogan">无限进步</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <a href="index.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📋</span>
+                        <span>所有项目</span>
+                    </a>
+                    <a href="upload.html" class="sidebar-item active">
+                        <span class="sidebar-item-icon">➕</span>
+                        <span>新建项目</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目状态</div>
+                    <a href="index.html?filter=pending" class="sidebar-item">
+                        <span class="sidebar-item-icon">✂️</span>
+                        <span>待剪辑确认</span>
+                        <span class="sidebar-item-count">3</span>
+                    </a>
+                    <a href="index.html?filter=delivered" class="sidebar-item">
+                        <span class="sidebar-item-icon">📤</span>
+                        <span>已交付运营</span>
+                        <span class="sidebar-item-count">2</span>
+                    </a>
+                    <a href="index.html?filter=archived" class="sidebar-item">
+                        <span class="sidebar-item-icon">📁</span>
+                        <span>已上线归档</span>
+                        <span class="sidebar-item-count">3</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">数据沉淀</div>
+                    <a href="analytics.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📊</span>
+                        <span>内容分析</span>
+                    </a>
+                    <a href="knowledge.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">🧠</span>
+                        <span>知识图谱</span>
+                        <span class="sidebar-item-count">Beta</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <a href="settings.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">⚙️</span>
+                        <span>AI 配置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主工作区 -->
+        <main class="main-content" style="padding: 0;">
+            <header class="main-header" style="padding: 12px 20px;">
+                <div class="main-header-left">
+                    <h1 class="page-title">新建项目</h1>
+                </div>
+            </header>
+            
+            <div class="upload-layout">
+                <!-- 左侧：历史项目 -->
+                <div class="history-panel">
+                    <div class="history-header">
+                        <div class="history-title">最近项目</div>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- 动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 右侧：上传区域 -->
+                <div class="upload-panel">
+                    <div class="upload-main">
+                        <div class="upload-card">
+                            <h2 class="upload-card-title">上传视频</h2>
+                            <p class="upload-card-desc">上传视频文件或粘贴视频URL，AI将自动分析并提取关键信息</p>
+                            
+                            <!-- 文件上传 -->
+                            <div class="upload-zone" id="uploadZone">
+                                <div id="uploadPlaceholder">
+                                    <div class="upload-zone-icon">📹</div>
+                                    <div class="upload-zone-text">点击或拖拽视频到此处</div>
+                                    <div class="upload-zone-hint">支持 MP4、MOV 格式，单文件 ≤50MB</div>
+                                </div>
+                                <div id="filePreview" class="file-preview" style="display: none;">
+                                    <span class="file-preview-icon">🎬</span>
+                                    <div class="file-preview-info">
+                                        <div class="file-preview-name" id="fileName">-</div>
+                                        <div class="file-preview-size" id="fileSize">-</div>
+                                    </div>
+                                    <button class="file-preview-remove" id="removeFile">移除</button>
+                                </div>
+                            </div>
+                            <input type="file" id="fileInput" accept="video/mp4,video/quicktime" hidden>
+                            
+                            <!-- 或者 -->
+                            <div class="upload-divider">或者</div>
+                            
+                            <!-- URL输入 -->
+                            <div class="url-input-group">
+                                <input type="text" 
+                                       class="url-input" 
+                                       id="videoUrl" 
+                                       placeholder="粘贴视频URL（如：https://example.com/video.mp4）">
+                            </div>
+                            
+                            <!-- 项目标题 -->
+                            <div class="title-section">
+                                <label class="section-label">项目标题</label>
+                                <input type="text" 
+                                       class="title-input" 
+                                       id="projectTitle" 
+                                       placeholder="例如：佳能C50深度评测">
+                            </div>
+                            
+                            <!-- 文案/脚本 -->
+                            <div class="script-section">
+                                <label class="section-label">视频文案 <span style="color: var(--text-tertiary); font-weight: normal;">（可选）</span></label>
+                                <p class="section-hint">粘贴视频文案或脚本，帮助AI更准确地分析内容</p>
+                                <textarea class="script-textarea" 
+                                          id="videoScript" 
+                                          placeholder="粘贴视频文案或脚本..."></textarea>
+                            </div>
+                            
+                            <!-- 操作按钮 -->
+                            <div class="upload-actions">
+                                <a href="index.html" class="btn btn-secondary">取消</a>
+                                <button class="btn btn-primary" id="startAnalysis">
+                                    <span>🚀</span>
+                                    <span>开始分析</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 加载状态 -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">AI 正在分析视频内容...</p>
+            <p class="loading-hint">这可能需要几分钟，请勿关闭页面</p>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="app.js"></script>
+    <script>
+        // ========================================
+        // 上传页逻辑
+        // ========================================
+        
+        let selectedFile = null;
+        
+        // 历史项目
+        const historyProjects = [
+            { id: "c50-001", title: "佳能C50深度评测", date: "2024-02-05", status: "pending" },
+            { id: "a7c2-002", title: "索尼A7C2使用体验", date: "2024-02-03", status: "delivered" },
+            { id: "pocket3-003", title: "DJI Pocket 3评测", date: "2024-02-01", status: "delivered" },
+            { id: "top5-004", title: "2024最值得买相机", date: "2024-01-28", status: "pending" },
+        ];
+        
+        // 渲染历史项目
+        function renderHistory() {
+            const container = document.getElementById('historyList');
+            container.innerHTML = historyProjects.map(p => `
+                <a href="project.html?id=${p.id}" class="history-item">
+                    <div class="history-item-title">
+                        <span class="history-item-status ${p.status}"></span>
+                        ${p.title}
+                    </div>
+                    <div class="history-item-meta">
+                        <span>${p.date}</span>
+                        <span>${p.status === 'delivered' ? '已交付' : '待确认'}</span>
+                    </div>
+                </a>
+            `).join('');
+        }
+        
+        // 文件上传
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const filePreview = document.getElementById('filePreview');
+        
+        uploadZone.addEventListener('click', (e) => {
+            if (e.target.id !== 'removeFile') {
+                fileInput.click();
+            }
+        });
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            if (file.size > 50 * 1024 * 1024) {
+                showToast('文件大小超过50MB限制');
+                return;
+            }
+            
+            if (!file.type.match(/video\/(mp4|quicktime)/)) {
+                showToast('请上传 MP4 或 MOV 格式');
+                return;
+            }
+            
+            selectedFile = file;
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            
+            uploadPlaceholder.style.display = 'none';
+            filePreview.style.display = 'flex';
+            uploadZone.classList.add('has-file');
+            
+            // 自动填充标题
+            if (!document.getElementById('projectTitle').value) {
+                const nameWithoutExt = file.name.replace(/\.[^/.]+$/, '');
+                document.getElementById('projectTitle').value = nameWithoutExt;
+            }
+        }
+        
+        document.getElementById('removeFile').addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectedFile = null;
+            fileInput.value = '';
+            uploadPlaceholder.style.display = 'block';
+            filePreview.style.display = 'none';
+            uploadZone.classList.remove('has-file');
+        });
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        // 开始分析
+        document.getElementById('startAnalysis').addEventListener('click', async function() {
+            const title = document.getElementById('projectTitle').value.trim();
+            const videoUrl = document.getElementById('videoUrl').value.trim();
+            const script = document.getElementById('videoScript').value.trim();
+            
+            // 验证
+            if (!title) {
+                showToast('请输入项目标题');
+                document.getElementById('projectTitle').focus();
+                return;
+            }
+            
+            if (!selectedFile && !videoUrl) {
+                showToast('请上传视频或输入视频URL');
+                return;
+            }
+            
+            // 检查API配置
+            const apiKey = localStorage.getItem('stormrelay_api_key');
+            if (!apiKey) {
+                showToast('请先配置 API Key');
+                setTimeout(() => {
+                    window.location.href = 'settings.html';
+                }, 1500);
+                return;
+            }
+            
+            // 显示加载
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            // 模拟分析过程
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // 创建项目
+            const projectId = 'proj-' + Date.now();
+            showToast('分析完成，正在跳转...');
+            
+            setTimeout(() => {
+                window.location.href = `project.html?id=${projectId}`;
+            }, 1000);
+        });
+        
+        // 初始化
+        renderHistory();
+    </script>
+</body>
+</html>

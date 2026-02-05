@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>飓风接力 · 项目详情</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* ========================================
+           项目详情页专用样式
+           ======================================== */
+        
+        .project-layout {
+            display: flex;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        
+        /* 左侧：视频+标注 */
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border-color);
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        /* 视频区域 */
+        .video-section {
+            background: #000;
+            flex-shrink: 0;
+        }
+        
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            max-height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+        }
+        
+        .video-wrapper video {
+            width: 100%;
+            max-height: 360px;
+        }
+        
+        .video-placeholder {
+            padding: 60px 40px;
+            text-align: center;
+            color: #666;
+        }
+        
+        .video-placeholder-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        /* 时间轴 */
+        .timeline-section {
+            padding: 12px 20px;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .timeline-bar {
+            height: 32px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        
+        .timeline-marker:hover {
+            transform: scaleX(2);
+        }
+        
+        .marker-highlight { background: #8B5CF6; }
+        .marker-keypoint { background: #F59E0B; }
+        .marker-caution { background: #EF4444; }
+        
+        /* 标注内容区 */
+        .annotation-section {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        /* 信息卡片 */
+        .info-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .info-card-body {
+            padding: 16px;
+        }
+        
+        /* 状态标签 */
+        .status-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .status-tag.ai { background: #EEF2FF; color: #4338CA; }
+        .status-tag.edited { background: #FEF3C7; color: #92400E; }
+        .status-tag.confirmed { background: #ECFDF5; color: #065F46; }
+        
+        /* 标注项样式 */
+        .annotation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            position: relative;
+            transition: all 0.15s;
+        }
+        
+        .annotation-item:hover {
+            background: #F0F0F5;
+        }
+        
+        .annotation-item.confirmed {
+            background: var(--success-bg);
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .annotation-item.edited {
+            background: #FFFBEB;
+            border-left: 3px solid var(--warning-color);
+        }
+        
+        .annotation-checkbox {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        
+        .annotation-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .annotation-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        
+        .annotation-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        
+        .annotation-actions {
+            display: flex;
+            gap: 4px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        
+        .annotation-item:hover .annotation-actions {
+            opacity: 1;
+        }
+        
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+        
+        .action-btn.delete:hover {
+            border-color: #DC2626;
+            color: #DC2626;
+        }
+        
+        /* 添加按钮 */
+        .add-item-btn {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            border: 2px dashed var(--border-color);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 8px;
+        }
+        
+        .add-item-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(94, 106, 210, 0.02);
+        }
+        
+        /* 编辑模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        /* 时间点卡片 */
+        .timestamp-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: var(--bg-primary);
+            border-radius: 6px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .timestamp-item:hover {
+            background: #F0F0F5;
+        }
+        
+        .timestamp-item.confirmed {
+            background: var(--success-bg);
+            border-left: 3px solid var(--success-color);
+        }
+        
+        .timestamp-time {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-color);
+            background: var(--bg-white);
+            padding: 4px 8px;
+            border-radius: 4px;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .timestamp-info {
+            flex: 1;
+        }
+        
+        .timestamp-desc {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+        
+        .timestamp-usage {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+        
+        /* 风险卡片 */
+        .caution-item {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid;
+            position: relative;
+        }
+        
+        .caution-item:hover .annotation-actions {
+            opacity: 1;
+        }
+        
+        .caution-item.level-medium {
+            background: var(--warning-bg);
+            border-color: var(--warning-color);
+        }
+        
+        .caution-item.level-low {
+            background: var(--info-bg);
+            border-color: var(--info-color);
+        }
+        
+        .caution-item.confirmed {
+            background: var(--success-bg);
+            border-color: var(--success-color);
+        }
+        
+        .caution-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .caution-level {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .caution-content {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .caution-action {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        /* 右侧面板 */
+        .right-panel {
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-white);
+            flex-shrink: 0;
+        }
+        
+        .right-panel-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .right-tabs {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .right-tab {
+            padding: 8px 16px;
+            font-size: 13px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        
+        .right-tab.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        
+        .right-panel-content {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .right-panel-section {
+            display: none;
+            padding: 16px;
+        }
+        
+        .right-panel-section.active {
+            display: block;
+        }
+        
+        /* 字幕列表 */
+        .transcript-line {
+            display: flex;
+            gap: 12px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .transcript-line:hover {
+            background: var(--bg-primary);
+        }
+        
+        .transcript-line.active {
+            background: rgba(94, 106, 210, 0.1);
+        }
+        
+        .transcript-time {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 11px;
+            color: var(--text-tertiary);
+            flex-shrink: 0;
+            width: 40px;
+        }
+        
+        .transcript-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+        
+        /* 笔记区域 */
+        .note-item {
+            padding: 14px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .note-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .note-author {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .note-time {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+        
+        .note-content {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+        
+        .note-input-area {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .note-textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            resize: none;
+            min-height: 80px;
+        }
+        
+        .note-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .note-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 8px;
+        }
+        
+        /* 状态指示器 */
+        .view-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .view-indicator-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .view-indicator-dot.editor { background: var(--accent-color); }
+        .view-indicator-dot.operator { background: var(--success-color); }
+        
+        .view-indicator-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* 底部操作栏 */
+        .bottom-bar {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-white);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .bottom-bar-left {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .confirm-progress {
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        .bottom-bar-right {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* 运营视角隐藏编辑功能 */
+        .operator-view .annotation-actions,
+        .operator-view .add-item-btn,
+        .operator-view .annotation-checkbox {
+            display: none !important;
+        }
+        
+        /* 已交付/归档状态禁用编辑 */
+        .readonly-mode .annotation-actions,
+        .readonly-mode .add-item-btn {
+            display: none !important;
+        }
+        
+        .readonly-mode .annotation-checkbox {
+            pointer-events: none;
+        }
+        
+        /* 未交付时运营视角显示的提示 */
+        .not-delivered-notice {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-tertiary);
+        }
+        
+        .not-delivered-notice h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        /* 撤回按钮 */
+        .withdraw-btn {
+            background: var(--warning-bg);
+            color: var(--warning-color);
+            border: 1px solid var(--warning-color);
+        }
+        
+        .withdraw-btn:hover {
+            background: #FEF3C7;
+        }
+        
+        @media (max-width: 1024px) {
+            .right-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="workspace-selector">
+                    <div class="workspace-info">
+                        <div class="workspace-top">
+                            <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
+                            <span class="workspace-name">飓风接力</span>
+                        </div>
+                        <span class="workspace-slogan">无限进步</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <a href="index.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📋</span>
+                        <span>所有项目</span>
+                    </a>
+                    <a href="upload.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">➕</span>
+                        <span>新建项目</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">项目状态</div>
+                    <a href="index.html?filter=pending" class="sidebar-item">
+                        <span class="sidebar-item-icon">✂️</span>
+                        <span>待剪辑确认</span>
+                    </a>
+                    <a href="index.html?filter=delivered" class="sidebar-item">
+                        <span class="sidebar-item-icon">📤</span>
+                        <span>已交付运营</span>
+                    </a>
+                    <a href="index.html?filter=archived" class="sidebar-item">
+                        <span class="sidebar-item-icon">📁</span>
+                        <span>已上线归档</span>
+                    </a>
+                </div>
+                
+                <div class="sidebar-divider"></div>
+                
+                <div class="sidebar-section">
+                    <a href="analytics.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">📊</span>
+                        <span>内容分析</span>
+                    </a>
+                    <a href="settings.html" class="sidebar-item">
+                        <span class="sidebar-item-icon">⚙️</span>
+                        <span>AI 配置</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- 主工作区 -->
+        <main class="main-content" style="padding: 0;">
+            <header class="main-header" style="padding: 12px 20px;">
+                <div class="main-header-left">
+                    <a href="index.html" class="back-link">← 返回</a>
+                    <h1 class="page-title" id="projectTitle" style="font-size: 15px;">加载中...</h1>
+                    <span class="status-badge status-pending" id="statusBadge">加载中</span>
+                </div>
+                <div class="main-header-right" id="headerActions">
+                    <div class="view-toggle">
+                        <button class="view-toggle-btn active" data-view="editor">剪辑视角</button>
+                        <button class="view-toggle-btn" data-view="operator">运营视角</button>
+                    </div>
+                    <button class="btn btn-primary" id="deliverBtn">
+                        <span>🚀</span>
+                        <span>确认交付运营</span>
+                    </button>
+                    <button class="btn withdraw-btn hidden" id="withdrawBtn">
+                        <span>↩️</span>
+                        <span>撤回修改</span>
+                    </button>
+                    <button class="btn btn-success hidden" id="archiveBtn">
+                        <span>📁</span>
+                        <span>标记上线归档</span>
+                    </button>
+                </div>
+            </header>
+            
+            <!-- 当前视角指示 -->
+            <div class="view-indicator" id="viewIndicator">
+                <span class="view-indicator-dot editor" id="viewDot"></span>
+                <span class="view-indicator-text" id="viewText">剪辑视角 · 可编辑、删除、添加标注</span>
+            </div>
+            
+            <div class="project-layout" id="projectLayout">
+                <!-- 左侧：视频+标注 -->
+                <div class="left-panel">
+                    <!-- 视频区域 -->
+                    <div class="video-section">
+                        <div class="video-wrapper" id="videoWrapper">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 时间轴 -->
+                    <div class="timeline-section">
+                        <div class="timeline-bar" id="timelineBar">
+                            <!-- 动态生成标记点 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 标注内容区 -->
+                    <div class="annotation-section" id="annotationSection">
+                        <!-- 运营未交付提示（运营视角时显示） -->
+                        <div class="not-delivered-notice hidden" id="notDeliveredNotice">
+                            <h3>⏳ 等待剪辑确认</h3>
+                            <p>剪辑师正在整理标注信息，交付后您将可以查看完整内容</p>
+                        </div>
+                        
+                        <!-- 标注内容（剪辑视角或已交付时显示） -->
+                        <div id="annotationContent">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 底部操作栏 -->
+                    <div class="bottom-bar">
+                        <div class="bottom-bar-left">
+                            已确认 <span class="confirm-progress" id="confirmProgress">0</span> 项 · 
+                            已编辑 <span class="confirm-progress" id="editedProgress">0</span> 项
+                        </div>
+                        <div class="bottom-bar-right">
+                            <button class="btn btn-secondary btn-sm" id="exportBtn">
+                                <span>📤</span>
+                                <span>导出清单</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧面板 -->
+                <div class="right-panel">
+                    <div class="right-panel-header">
+                        <div class="right-tabs">
+                            <button class="right-tab active" data-panel="transcript">字幕</button>
+                            <button class="right-tab" data-panel="notes">笔记</button>
+                            <button class="right-tab" data-panel="summary">AI总结</button>
+                        </div>
+                    </div>
+                    
+                    <div class="right-panel-content">
+                        <!-- 字幕面板 -->
+                        <div class="right-panel-section active" id="transcriptPanel">
+                            <div id="transcriptContent">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 笔记面板 -->
+                        <div class="right-panel-section" id="notesPanel">
+                            <div id="notesContent">
+                                <!-- 动态生成 -->
+                            </div>
+                            <div class="note-input-area">
+                                <textarea class="note-textarea" 
+                                          id="noteInput" 
+                                          placeholder="写下你的笔记..."></textarea>
+                                <div class="note-actions">
+                                    <button class="btn btn-primary btn-sm" id="addNoteBtn">添加笔记</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI总结面板 -->
+                        <div class="right-panel-section" id="summaryPanel">
+                            <div id="summaryContent">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- 编辑模态框 -->
+    <div class="modal-overlay hidden" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">编辑标注</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" id="modalLabel">内容</label>
+                    <textarea class="form-input form-textarea" id="modalInput" rows="4"></textarea>
+                </div>
+                <div class="form-group" id="modalExtraGroup" style="display: none;">
+                    <label class="form-label" id="modalExtraLabel">附加信息</label>
+                    <input type="text" class="form-input" id="modalExtraInput">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button class="btn btn-primary" id="modalSaveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="app.js"></script>
+    <script>
+        // ========================================
+        // 项目数据
+        // ========================================
+        
+        let projectData = null;
+        let currentView = 'editor';
+        let editingItem = null;
+        let nextPointId = 100;
+        let nextTimestampId = 100;
+        let nextCautionId = 100;
+        
+        // ========================================
+        // 初始化
+        // ========================================
+        
+        function init() {
+            // 从URL获取项目ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const projectId = urlParams.get('id');
+            
+            if (!projectId) {
+                showToast('未指定项目ID');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+                return;
+            }
+            
+            // 加载项目数据
+            projectData = getProjectById(projectId);
+            
+            if (!projectData) {
+                showToast('项目不存在');
+                setTimeout(() => window.location.href = 'index.html', 1500);
+                return;
+            }
+            
+            // 渲染页面
+            renderProjectHeader();
+            renderVideo();
+            renderAnnotations();
+            renderTranscript();
+            renderNotes();
+            renderSummary();
+            renderTimelineMarkers();
+            updateProgress();
+            updateUIByStatus();
+            bindEvents();
+        }
+        
+        // ========================================
+        // 渲染函数
+        // ========================================
+        
+        function renderProjectHeader() {
+            document.getElementById('projectTitle').textContent = projectData.title;
+            document.title = `飓风接力 · ${projectData.title}`;
+            
+            const statusConfig = {
+                pending: { label: '待剪辑确认', class: 'status-pending' },
+                delivered: { label: '已交付运营', class: 'status-delivered' },
+                archived: { label: '已上线归档', class: 'status-archived' }
+            };
+            
+            const config = statusConfig[projectData.status];
+            const badge = document.getElementById('statusBadge');
+            badge.textContent = config.label;
+            badge.className = `status-badge ${config.class}`;
+        }
+        
+        function renderVideo() {
+            const wrapper = document.getElementById('videoWrapper');
+            
+            if (projectData.videoSrc) {
+                wrapper.innerHTML = `
+                    <video id="mediaPlayer" controls>
+                        <source src="${projectData.videoSrc}" type="video/mp4">
+                        您的浏览器不支持视频播放
+                    </video>
+                `;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="video-placeholder">
+                        <div class="video-placeholder-icon">🎬</div>
+                        <p>此项目为演示数据，暂无视频文件</p>
+                        <p style="font-size: 12px; margin-top: 8px;">实际使用时，这里会显示上传的视频</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderAnnotations() {
+            const container = document.getElementById('annotationContent');
+            
+            container.innerHTML = `
+                <!-- 核心定位 -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <span class="info-card-title">🎯 核心定位</span>
+                        <div class="info-card-actions">
+                            ${getStatusTagHTML(projectData.corePosition.status)}
+                        </div>
+                    </div>
+                    <div class="info-card-body">
+                        <div class="annotation-item ${projectData.corePosition.status}" id="corePositionItem">
+                            <input type="checkbox" class="annotation-checkbox" id="coreConfirm" 
+                                   ${projectData.corePosition.status === 'confirmed' ? 'checked' : ''}>
+                            <div class="annotation-content">
+                                <div class="annotation-text" id="corePositionText">
+                                    ${projectData.corePosition.content}
+                                </div>
+                            </div>
+                            <div class="annotation-actions">
+                                <button class="action-btn" onclick="editCorePosition()">✏️ 编辑</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 核心卖点 -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <span class="info-card-title">💡 核心卖点</span>
+                    </div>
+                    <div class="info-card-body" id="sellingPointsBody">
+                        ${renderSellingPoints()}
+                    </div>
+                </div>
+                
+                <!-- 关键时间点 -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <span class="info-card-title">⏱️ 关键时间点</span>
+                    </div>
+                    <div class="info-card-body" id="timestampsBody">
+                        ${renderTimestamps()}
+                    </div>
+                </div>
+                
+                <!-- 注意事项 -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <span class="info-card-title">⚠️ 注意事项</span>
+                    </div>
+                    <div class="info-card-body" id="cautionsBody">
+                        ${renderCautions()}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function getStatusTagHTML(status) {
+            const tags = {
+                ai: '<span class="status-tag ai">🤖 AI提取</span>',
+                edited: '<span class="status-tag edited">✏️ 剪辑修改</span>',
+                confirmed: '<span class="status-tag confirmed">✅ 已确认</span>'
+            };
+            return tags[status] || tags.ai;
+        }
+        
+        function renderSellingPoints() {
+            if (!projectData.sellingPoints || projectData.sellingPoints.length === 0) {
+                return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无卖点数据</p>';
+            }
+            
+            return projectData.sellingPoints.map(point => `
+                <div class="annotation-item ${point.status}" data-id="${point.id}" data-type="point">
+                    <input type="checkbox" class="annotation-checkbox point-cb" 
+                           data-id="${point.id}" ${point.status === 'confirmed' ? 'checked' : ''}>
+                    <div class="annotation-content">
+                        <div class="annotation-text">${point.content}</div>
+                        <div class="annotation-meta">
+                            ${getStatusTagHTML(point.status)}
+                        </div>
+                    </div>
+                    <div class="annotation-actions">
+                        <button class="action-btn" onclick="editPoint(${point.id})">✏️ 编辑</button>
+                        <button class="action-btn delete" onclick="deletePoint(${point.id})">🗑️ 删除</button>
+                    </div>
+                </div>
+            `).join('') + `
+                <button class="add-item-btn" onclick="addPoint()">+ 添加卖点</button>
+            `;
+        }
+        
+        function renderTimestamps() {
+            if (!projectData.timestamps || projectData.timestamps.length === 0) {
+                return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无时间点数据</p>';
+            }
+            
+            return projectData.timestamps.map(ts => `
+                <div class="timestamp-item ${ts.status}" data-id="${ts.id}" data-seconds="${ts.seconds || 0}">
+                    <input type="checkbox" class="annotation-checkbox timestamp-cb" 
+                           data-id="${ts.id}" ${ts.status === 'confirmed' ? 'checked' : ''}>
+                    <span class="timestamp-time">${ts.time}</span>
+                    <div class="timestamp-info">
+                        <div class="timestamp-desc">${ts.description}</div>
+                        <div class="timestamp-usage">${ts.usage} · ${getStatusTagHTML(ts.status)}</div>
+                    </div>
+                    <div class="annotation-actions">
+                        <button class="action-btn" onclick="editTimestamp(${ts.id})">✏️</button>
+                        <button class="action-btn delete" onclick="deleteTimestamp(${ts.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('') + `
+                <button class="add-item-btn" onclick="addTimestamp()">+ 添加时间点</button>
+            `;
+        }
+        
+        function renderCautions() {
+            if (!projectData.cautions || projectData.cautions.length === 0) {
+                return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">✅ 无风险预警</p>';
+            }
+            
+            return projectData.cautions.map(c => `
+                <div class="caution-item level-${c.level} ${c.status}" data-id="${c.id}">
+                    <div class="caution-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" class="annotation-checkbox caution-cb" 
+                                   data-id="${c.id}" ${c.status === 'confirmed' ? 'checked' : ''}>
+                            <span class="caution-level">${c.level === 'medium' ? '⚠️ 中风险' : 'ℹ️ 低风险'}</span>
+                            ${getStatusTagHTML(c.status)}
+                        </div>
+                        <div class="annotation-actions" style="opacity: 1;">
+                            <button class="action-btn" onclick="editCaution(${c.id})">✏️</button>
+                            <button class="action-btn delete" onclick="deleteCaution(${c.id})">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="caution-content">${c.content}</div>
+                    <div class="caution-action"><strong>建议：</strong>${c.action}</div>
+                </div>
+            `).join('') + `
+                <button class="add-item-btn" onclick="addCaution()">+ 添加注意事项</button>
+            `;
+        }
+        
+        function renderTranscript() {
+            const container = document.getElementById('transcriptContent');
+            
+            if (!projectData.transcript || projectData.transcript.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: 40px;">暂无字幕数据</p>';
+                return;
+            }
+            
+            container.innerHTML = projectData.transcript.map(line => `
+                <div class="transcript-line" data-seconds="${line.seconds}">
+                    <span class="transcript-time">${line.time}</span>
+                    <span class="transcript-text">${line.text}</span>
+                </div>
+            `).join('');
+        }
+        
+        function renderNotes() {
+            const container = document.getElementById('notesContent');
+            
+            if (!projectData.notes || projectData.notes.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无笔记</p>';
+                return;
+            }
+            
+            container.innerHTML = projectData.notes.map(note => `
+                <div class="note-item">
+                    <div class="note-header">
+                        <span class="note-author">${note.author === '剪辑师' ? '✂️' : '📢'} ${note.author}</span>
+                        <span class="note-time">${note.time}</span>
+                    </div>
+                    <div class="note-content">${note.content}</div>
+                </div>
+            `).join('');
+        }
+        
+        function renderSummary() {
+            const container = document.getElementById('summaryContent');
+            
+            if (!projectData.aiSummary) {
+                container.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: 40px;">暂无AI总结</p>';
+                return;
+            }
+            
+            const s = projectData.aiSummary;
+            container.innerHTML = `
+                <div class="note-item">
+                    <div class="note-header">
+                        <span class="note-author">🤖 AI 总结</span>
+                    </div>
+                    <div class="note-content">
+                        <p><strong>视频主题：</strong>${s.topic}</p>
+                        <p style="margin-top: 8px;"><strong>核心观点：</strong>${s.core}</p>
+                        <p style="margin-top: 8px;"><strong>亮点功能：</strong>${s.highlights}</p>
+                        <p style="margin-top: 8px;"><strong>主要不足：</strong>${s.weaknesses}</p>
+                        <p style="margin-top: 8px;"><strong>适合人群：</strong>${s.audience}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderTimelineMarkers() {
+            const container = document.getElementById('timelineBar');
+            
+            if (!projectData.timestamps || projectData.timestamps.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            // 解析时长
+            const durationParts = projectData.duration.split(':');
+            const totalSeconds = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
+            
+            let markersHtml = '';
+            projectData.timestamps.forEach(ts => {
+                const seconds = ts.seconds || 0;
+                const percent = (seconds / totalSeconds) * 100;
+                const isRisk = ts.usage && ts.usage.includes('风险');
+                markersHtml += `
+                    <div class="timeline-marker ${isRisk ? 'marker-caution' : 'marker-keypoint'}" 
+                         style="left: ${percent}%;" 
+                         data-seconds="${seconds}"
+                         title="${ts.time} ${ts.description}">
+                    </div>
+                `;
+            });
+            container.innerHTML = markersHtml;
+        }
+        
+        // ========================================
+        // 根据状态更新UI
+        // ========================================
+        
+        function updateUIByStatus() {
+            const layout = document.getElementById('projectLayout');
+            const deliverBtn = document.getElementById('deliverBtn');
+            const withdrawBtn = document.getElementById('withdrawBtn');
+            const archiveBtn = document.getElementById('archiveBtn');
+            
+            // 清除所有状态类
+            layout.classList.remove('readonly-mode', 'operator-view');
+            
+            if (projectData.status === 'pending') {
+                // 待剪辑确认：剪辑可编辑，运营看不到
+                deliverBtn.classList.remove('hidden');
+                withdrawBtn.classList.add('hidden');
+                archiveBtn.classList.add('hidden');
+            } else if (projectData.status === 'delivered') {
+                // 已交付运营：剪辑只读+可撤回，运营可查看+可归档
+                deliverBtn.classList.add('hidden');
+                withdrawBtn.classList.remove('hidden');
+                archiveBtn.classList.remove('hidden');
+                layout.classList.add('readonly-mode');
+            } else if (projectData.status === 'archived') {
+                // 已归档：都只读，可撤回
+                deliverBtn.classList.add('hidden');
+                withdrawBtn.classList.remove('hidden');
+                archiveBtn.classList.add('hidden');
+                layout.classList.add('readonly-mode');
+            }
+        }
+        
+        // ========================================
+        // 视角切换
+        // ========================================
+        
+        function switchView(view) {
+            currentView = view;
+            const layout = document.getElementById('projectLayout');
+            const viewDot = document.getElementById('viewDot');
+            const viewText = document.getElementById('viewText');
+            const annotationContent = document.getElementById('annotationContent');
+            const notDeliveredNotice = document.getElementById('notDeliveredNotice');
+            
+            document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            
+            layout.classList.toggle('operator-view', view === 'operator');
+            viewDot.className = `view-indicator-dot ${view}`;
+            
+            if (view === 'editor') {
+                viewText.textContent = projectData.status === 'pending' ? 
+                    '剪辑视角 · 可编辑、删除、添加标注' : 
+                    '剪辑视角 · 只读模式';
+                annotationContent.classList.remove('hidden');
+                notDeliveredNotice.classList.add('hidden');
+            } else {
+                viewText.textContent = '运营视角 · 查看剪辑师确认的信息';
+                
+                // 运营视角：未交付时显示提示
+                if (projectData.status === 'pending') {
+                    annotationContent.classList.add('hidden');
+                    notDeliveredNotice.classList.remove('hidden');
+                } else {
+                    annotationContent.classList.remove('hidden');
+                    notDeliveredNotice.classList.add('hidden');
+                }
+            }
+        }
+        
+        // ========================================
+        // 更新进度
+        // ========================================
+        
+        function updateProgress() {
+            let confirmed = 0;
+            let edited = 0;
+            
+            if (projectData.corePosition.status === 'confirmed') confirmed++;
+            if (projectData.corePosition.status === 'edited') edited++;
+            
+            if (projectData.sellingPoints) {
+                confirmed += projectData.sellingPoints.filter(p => p.status === 'confirmed').length;
+                edited += projectData.sellingPoints.filter(p => p.status === 'edited').length;
+            }
+            
+            if (projectData.timestamps) {
+                confirmed += projectData.timestamps.filter(t => t.status === 'confirmed').length;
+                edited += projectData.timestamps.filter(t => t.status === 'edited').length;
+            }
+            
+            if (projectData.cautions) {
+                confirmed += projectData.cautions.filter(c => c.status === 'confirmed').length;
+                edited += projectData.cautions.filter(c => c.status === 'edited').length;
+            }
+            
+            document.getElementById('confirmProgress').textContent = confirmed;
+            document.getElementById('editedProgress').textContent = edited;
+        }
+        
+        // ========================================
+        // 编辑功能
+        // ========================================
+        
+        function editCorePosition() {
+            editingItem = { type: 'core' };
+            document.getElementById('modalTitle').textContent = '编辑核心定位';
+            document.getElementById('modalLabel').textContent = '定位描述';
+            document.getElementById('modalInput').value = projectData.corePosition.content;
+            document.getElementById('modalExtraGroup').style.display = 'none';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function editPoint(id) {
+            const point = projectData.sellingPoints.find(p => p.id === id);
+            editingItem = { type: 'point', id };
+            document.getElementById('modalTitle').textContent = '编辑卖点';
+            document.getElementById('modalLabel').textContent = '卖点内容';
+            document.getElementById('modalInput').value = point.content;
+            document.getElementById('modalExtraGroup').style.display = 'none';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function editTimestamp(id) {
+            const ts = projectData.timestamps.find(t => t.id === id);
+            editingItem = { type: 'timestamp', id };
+            document.getElementById('modalTitle').textContent = '编辑时间点';
+            document.getElementById('modalLabel').textContent = '时间点描述';
+            document.getElementById('modalInput').value = ts.description;
+            document.getElementById('modalExtraGroup').style.display = 'block';
+            document.getElementById('modalExtraLabel').textContent = '用途标记';
+            document.getElementById('modalExtraInput').value = ts.usage;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function editCaution(id) {
+            const c = projectData.cautions.find(c => c.id === id);
+            editingItem = { type: 'caution', id };
+            document.getElementById('modalTitle').textContent = '编辑注意事项';
+            document.getElementById('modalLabel').textContent = '风险描述';
+            document.getElementById('modalInput').value = c.content;
+            document.getElementById('modalExtraGroup').style.display = 'block';
+            document.getElementById('modalExtraLabel').textContent = '建议行动';
+            document.getElementById('modalExtraInput').value = c.action;
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        // ========================================
+        // 删除功能
+        // ========================================
+        
+        function deletePoint(id) {
+            if (!confirm('确定删除这个卖点吗？')) return;
+            projectData.sellingPoints = projectData.sellingPoints.filter(p => p.id !== id);
+            saveProjectData();
+            document.getElementById('sellingPointsBody').innerHTML = renderSellingPoints();
+            updateProgress();
+            rebindCheckboxEvents();
+            showToast('已删除');
+        }
+        
+        function deleteTimestamp(id) {
+            if (!confirm('确定删除这个时间点吗？')) return;
+            projectData.timestamps = projectData.timestamps.filter(t => t.id !== id);
+            saveProjectData();
+            document.getElementById('timestampsBody').innerHTML = renderTimestamps();
+            renderTimelineMarkers();
+            updateProgress();
+            rebindCheckboxEvents();
+            showToast('已删除');
+        }
+        
+        function deleteCaution(id) {
+            if (!confirm('确定删除这个注意事项吗？')) return;
+            projectData.cautions = projectData.cautions.filter(c => c.id !== id);
+            saveProjectData();
+            document.getElementById('cautionsBody').innerHTML = renderCautions();
+            updateProgress();
+            rebindCheckboxEvents();
+            showToast('已删除');
+        }
+        
+        // ========================================
+        // 添加功能
+        // ========================================
+        
+        function addPoint() {
+            editingItem = { type: 'newPoint' };
+            document.getElementById('modalTitle').textContent = '添加卖点';
+            document.getElementById('modalLabel').textContent = '卖点内容';
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalExtraGroup').style.display = 'none';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function addTimestamp() {
+            editingItem = { type: 'newTimestamp' };
+            document.getElementById('modalTitle').textContent = '添加时间点';
+            document.getElementById('modalLabel').textContent = '时间点描述';
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalExtraGroup').style.display = 'block';
+            document.getElementById('modalExtraLabel').textContent = '时间（如 05:30）';
+            document.getElementById('modalExtraInput').value = '';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function addCaution() {
+            editingItem = { type: 'newCaution' };
+            document.getElementById('modalTitle').textContent = '添加注意事项';
+            document.getElementById('modalLabel').textContent = '风险描述';
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalExtraGroup').style.display = 'block';
+            document.getElementById('modalExtraLabel').textContent = '建议行动';
+            document.getElementById('modalExtraInput').value = '';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('editModal').classList.add('hidden');
+            editingItem = null;
+        }
+        
+        // ========================================
+        // 保存数据
+        // ========================================
+        
+        function saveProjectData() {
+            updateProject(projectData);
+        }
+        
+        // ========================================
+        // 状态流转
+        // ========================================
+        
+        function deliverToOperator() {
+            const confirmed = 
+                (projectData.corePosition.status === 'confirmed' ? 1 : 0) +
+                (projectData.sellingPoints ? projectData.sellingPoints.filter(p => p.status === 'confirmed').length : 0);
+            
+            if (confirmed < 2) {
+                showToast('请至少确认核心定位和一个卖点');
+                return;
+            }
+            
+            projectData.status = 'delivered';
+            projectData.deliveredAt = new Date().toISOString().split('T')[0];
+            saveProjectData();
+            
+            renderProjectHeader();
+            updateUIByStatus();
+            showToast('交付成功！项目已移至"已交付运营"');
+            
+            setTimeout(() => switchView('operator'), 500);
+        }
+        
+        function archiveProject() {
+            if (!confirm('确定将此项目标记为已上线归档吗？')) return;
+            
+            projectData.status = 'archived';
+            projectData.archivedAt = new Date().toISOString().split('T')[0];
+            saveProjectData();
+            
+            renderProjectHeader();
+            updateUIByStatus();
+            showToast('归档成功！项目已移至"已上线归档"');
+        }
+        
+        function withdrawProject() {
+            const prevStatus = projectData.status === 'archived' ? '已交付运营' : '待剪辑确认';
+            const newStatus = projectData.status === 'archived' ? 'delivered' : 'pending';
+            
+            if (!confirm(`确定要将项目撤回到"${prevStatus}"状态吗？`)) return;
+            
+            projectData.status = newStatus;
+            if (newStatus === 'pending') {
+                projectData.deliveredAt = null;
+            }
+            if (newStatus === 'delivered') {
+                projectData.archivedAt = null;
+            }
+            saveProjectData();
+            
+            renderProjectHeader();
+            updateUIByStatus();
+            switchView('editor');
+            showToast(`已撤回到"${prevStatus}"`);
+        }
+        
+        // ========================================
+        // 事件绑定
+        // ========================================
+        
+        function bindEvents() {
+            // 视角切换
+            document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchView(btn.dataset.view));
+            });
+            
+            // 右侧标签切换
+            document.querySelectorAll('.right-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.right-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    document.querySelectorAll('.right-panel-section').forEach(s => s.classList.remove('active'));
+                    document.getElementById(this.dataset.panel + 'Panel').classList.add('active');
+                });
+            });
+            
+            // 模态框保存
+            document.getElementById('modalSaveBtn').addEventListener('click', function() {
+                const content = document.getElementById('modalInput').value.trim();
+                if (!content) {
+                    showToast('内容不能为空');
+                    return;
+                }
+                
+                const extra = document.getElementById('modalExtraInput').value.trim();
+                
+                if (editingItem.type === 'core') {
+                    projectData.corePosition.content = content;
+                    projectData.corePosition.status = 'edited';
+                    saveProjectData();
+                    renderAnnotations();
+                } else if (editingItem.type === 'point') {
+                    const point = projectData.sellingPoints.find(p => p.id === editingItem.id);
+                    point.content = content;
+                    point.status = 'edited';
+                    saveProjectData();
+                    document.getElementById('sellingPointsBody').innerHTML = renderSellingPoints();
+                } else if (editingItem.type === 'timestamp') {
+                    const ts = projectData.timestamps.find(t => t.id === editingItem.id);
+                    ts.description = content;
+                    ts.usage = extra || ts.usage;
+                    ts.status = 'edited';
+                    saveProjectData();
+                    document.getElementById('timestampsBody').innerHTML = renderTimestamps();
+                    renderTimelineMarkers();
+                } else if (editingItem.type === 'caution') {
+                    const c = projectData.cautions.find(c => c.id === editingItem.id);
+                    c.content = content;
+                    c.action = extra || c.action;
+                    c.status = 'edited';
+                    saveProjectData();
+                    document.getElementById('cautionsBody').innerHTML = renderCautions();
+                } else if (editingItem.type === 'newPoint') {
+                    if (!projectData.sellingPoints) projectData.sellingPoints = [];
+                    projectData.sellingPoints.push({
+                        id: nextPointId++,
+                        content: content,
+                        status: 'edited'
+                    });
+                    saveProjectData();
+                    document.getElementById('sellingPointsBody').innerHTML = renderSellingPoints();
+                } else if (editingItem.type === 'newTimestamp') {
+                    if (!projectData.timestamps) projectData.timestamps = [];
+                    const timeStr = extra || '00:00';
+                    const parts = timeStr.split(':');
+                    const seconds = parseInt(parts[0]) * 60 + parseInt(parts[1] || 0);
+                    projectData.timestamps.push({
+                        id: nextTimestampId++,
+                        time: timeStr,
+                        seconds: seconds,
+                        description: content,
+                        usage: '自定义',
+                        status: 'edited'
+                    });
+                    saveProjectData();
+                    document.getElementById('timestampsBody').innerHTML = renderTimestamps();
+                    renderTimelineMarkers();
+                } else if (editingItem.type === 'newCaution') {
+                    if (!projectData.cautions) projectData.cautions = [];
+                    projectData.cautions.push({
+                        id: nextCautionId++,
+                        content: content,
+                        level: 'low',
+                        action: extra || '待确认',
+                        status: 'edited'
+                    });
+                    saveProjectData();
+                    document.getElementById('cautionsBody').innerHTML = renderCautions();
+                }
+                
+                closeModal();
+                updateProgress();
+                rebindCheckboxEvents();
+                showToast('保存成功');
+            });
+            
+            // 时间点点击跳转
+            document.addEventListener('click', function(e) {
+                const timestampItem = e.target.closest('.timestamp-item');
+                if (timestampItem && !e.target.closest('.annotation-actions') && !e.target.closest('.annotation-checkbox')) {
+                    const seconds = parseInt(timestampItem.dataset.seconds);
+                    const player = document.getElementById('mediaPlayer');
+                    if (player) {
+                        player.currentTime = seconds;
+                        player.play();
+                    }
+                }
+                
+                const transcriptLine = e.target.closest('.transcript-line');
+                if (transcriptLine) {
+                    const seconds = parseInt(transcriptLine.dataset.seconds);
+                    const player = document.getElementById('mediaPlayer');
+                    if (player) {
+                        player.currentTime = seconds;
+                        player.play();
+                    }
+                    document.querySelectorAll('.transcript-line').forEach(l => l.classList.remove('active'));
+                    transcriptLine.classList.add('active');
+                }
+                
+                const timelineMarker = e.target.closest('.timeline-marker');
+                if (timelineMarker) {
+                    const seconds = parseInt(timelineMarker.dataset.seconds);
+                    const player = document.getElementById('mediaPlayer');
+                    if (player) {
+                        player.currentTime = seconds;
+                        player.play();
+                    }
+                }
+            });
+            
+            rebindCheckboxEvents();
+            
+            // 添加笔记
+            document.getElementById('addNoteBtn').addEventListener('click', function() {
+                const input = document.getElementById('noteInput');
+                const content = input.value.trim();
+                if (!content) return;
+                
+                const author = currentView === 'editor' ? '剪辑师' : '运营';
+                if (!projectData.notes) projectData.notes = [];
+                projectData.notes.push({
+                    id: Date.now(),
+                    author: author,
+                    time: '刚刚',
+                    content: content
+                });
+                
+                saveProjectData();
+                renderNotes();
+                input.value = '';
+                showToast('笔记已添加');
+            });
+            
+            // 交付按钮
+            document.getElementById('deliverBtn').addEventListener('click', deliverToOperator);
+            
+            // 撤回按钮
+            document.getElementById('withdrawBtn').addEventListener('click', withdrawProject);
+            
+            // 归档按钮
+            document.getElementById('archiveBtn').addEventListener('click', archiveProject);
+            
+            // ESC关闭模态框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+            
+            // 点击遮罩关闭
+            document.getElementById('editModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        }
+        
+        function rebindCheckboxEvents() {
+            // 核心定位确认
+            const coreConfirm = document.getElementById('coreConfirm');
+            if (coreConfirm) {
+                coreConfirm.addEventListener('change', function() {
+                    projectData.corePosition.status = this.checked ? 'confirmed' : 'ai';
+                    saveProjectData();
+                    renderAnnotations();
+                    updateProgress();
+                    rebindCheckboxEvents();
+                });
+            }
+            
+            // 卖点确认
+            document.querySelectorAll('.point-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id = parseInt(this.dataset.id);
+                    const point = projectData.sellingPoints.find(p => p.id === id);
+                    point.status = this.checked ? 'confirmed' : 'ai';
+                    saveProjectData();
+                    document.getElementById('sellingPointsBody').innerHTML = renderSellingPoints();
+                    updateProgress();
+                    rebindCheckboxEvents();
+                });
+            });
+            
+            // 时间点确认
+            document.querySelectorAll('.timestamp-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id = parseInt(this.dataset.id);
+                    const ts = projectData.timestamps.find(t => t.id === id);
+                    ts.status = this.checked ? 'confirmed' : 'ai';
+                    saveProjectData();
+                    document.getElementById('timestampsBody').innerHTML = renderTimestamps();
+                    updateProgress();
+                    rebindCheckboxEvents();
+                });
+            });
+            
+            // 风险确认
+            document.querySelectorAll('.caution-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id = parseInt(this.dataset.id);
+                    const c = projectData.cautions.find(c => c.id === id);
+                    c.status = this.checked ? 'confirmed' : 'ai';
+                    saveProjectData();
+                    document.getElementById('cautionsBody').innerHTML = renderCautions();
+                    updateProgress();
+                    rebindCheckboxEvents();
+                });
+            });
+        }
+        
+        // 初始化
+        init();
+    </script>
+</body>
+</html>
