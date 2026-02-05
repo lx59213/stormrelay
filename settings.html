@@ -384,7 +384,7 @@
         
         // 更新数据统计
         function updateDataStats() {
-            const projects = getProjects();
+            const projects = getAllProjects();
             const delivered = projects.filter(p => p.project.status === 'delivered');
             
             document.getElementById('projectCount').textContent = projects.length;
@@ -489,7 +489,7 @@
         // 导出数据
         document.getElementById('exportDataBtn').addEventListener('click', function() {
             const data = {
-                projects: getProjects(),
+                projects: getAllProjects(),
                 prompts: JSON.parse(localStorage.getItem('stormrelay_prompts') || '{}'),
                 exportDate: new Date().toISOString()
             };
