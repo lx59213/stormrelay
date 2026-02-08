@@ -35,11 +35,9 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <a href="index.html" class="workspace-selector">
+                    <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
                     <div class="workspace-info">
-                        <div class="workspace-top">
-                            <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
-                            <span class="workspace-name">飓风接力</span>
-                        </div>
+                        <span class="workspace-name">飓风接力</span>
                         <span class="workspace-slogan">无限进步</span>
                     </div>
                 </a>
@@ -47,7 +45,7 @@
             
             <div class="sidebar-content">
                 <div class="sidebar-section">
-                    <a href="index.html" class="sidebar-item active" id="navAll">
+                    <a href="index.html" class="sidebar-item sidebar-filter" id="navAll" data-filter="all">
                         <span class="sidebar-item-icon">📋</span>
                         <span>所有项目</span>
                     </a>
@@ -61,17 +59,17 @@
                 
                 <div class="sidebar-section">
                     <div class="sidebar-section-title">项目状态</div>
-                    <a href="index.html?filter=pending" class="sidebar-item" id="navPending">
+                    <a href="index.html?filter=pending" class="sidebar-item sidebar-filter" id="navPending" data-filter="pending">
                         <span class="sidebar-item-icon">✂️</span>
                         <span>待剪辑确认</span>
                         <span class="sidebar-item-count" id="countPending">0</span>
                     </a>
-                    <a href="index.html?filter=delivered" class="sidebar-item" id="navDelivered">
+                    <a href="index.html?filter=delivered" class="sidebar-item sidebar-filter" id="navDelivered" data-filter="delivered">
                         <span class="sidebar-item-icon">📤</span>
                         <span>已交付运营</span>
                         <span class="sidebar-item-count" id="countDelivered">0</span>
                     </a>
-                    <a href="index.html?filter=archived" class="sidebar-item" id="navArchived">
+                    <a href="index.html?filter=archived" class="sidebar-item sidebar-filter" id="navArchived" data-filter="archived">
                         <span class="sidebar-item-icon">📁</span>
                         <span>已上线归档</span>
                         <span class="sidebar-item-count" id="countArchived">0</span>
@@ -110,7 +108,7 @@
                 <div class="main-header-left">
                     <h1 class="page-title" id="pageTitle">所有项目</h1>
                     <div class="header-tabs">
-                        <button class="header-tab active" data-filter="all">全部</button>
+                        <button class="header-tab" data-filter="all">全部</button>
                         <button class="header-tab" data-filter="pending">待剪辑确认</button>
                         <button class="header-tab" data-filter="delivered">已交付运营</button>
                         <button class="header-tab" data-filter="archived">已上线归档</button>
@@ -132,12 +130,12 @@
                         <span class="stat-label">总项目</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">80%</span>
-                        <span class="stat-label">效率提升</span>
+                        <span class="stat-value" id="statDelivered">0</span>
+                        <span class="stat-label">已交付</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">6.2h</span>
-                        <span class="stat-label">本月节省</span>
+                        <span class="stat-value" id="statArchived">0</span>
+                        <span class="stat-label">已归档</span>
                     </div>
                 </div>
                 
@@ -295,21 +293,44 @@
             document.getElementById('countDelivered').textContent = stats.delivered;
             document.getElementById('countArchived').textContent = stats.archived;
             document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statDelivered').textContent = stats.delivered;
+            document.getElementById('statArchived').textContent = stats.archived;
         }
         
-        // Tab点击事件
+        // ---- 统一筛选切换（零闪烁） ----
+        function switchFilter(filter) {
+            const url = filter === 'all' ? 'index.html' : `index.html?filter=${filter}`;
+            history.pushState({}, '', url);
+            currentFilter = filter;
+            updateSidebarActive();
+            updateTabActive();
+            updatePageTitle();
+            renderProjects();
+        }
+        
+        // 顶栏 Tab 点击
         document.querySelectorAll('.header-tab').forEach(tab => {
             tab.addEventListener('click', function() {
-                const filter = this.dataset.filter;
-                const url = filter === 'all' ? 'index.html' : `index.html?filter=${filter}`;
-                history.pushState({}, '', url);
-                
-                currentFilter = filter;
-                updateSidebarActive();
-                updateTabActive();
-                updatePageTitle();
-                renderProjects();
+                switchFilter(this.dataset.filter);
             });
+        });
+        
+        // 侧边栏筛选链接 — 拦截跳转，改用 pushState
+        document.querySelectorAll('.sidebar-filter').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                switchFilter(this.dataset.filter);
+            });
+        });
+        
+        // 浏览器前进/后退
+        window.addEventListener('popstate', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentFilter = urlParams.get('filter') || 'all';
+            updateSidebarActive();
+            updateTabActive();
+            updatePageTitle();
+            renderProjects();
         });
         
         // 刷新按钮

@@ -541,6 +541,22 @@ function getEfficiencyData() {
 }
 
 // ========================================
+// 侧边栏计数同步（所有页面通用）
+// ========================================
+function updateSidebarCounts() {
+    const stats = getProjectStats();
+    document.querySelectorAll('.sidebar-item-count').forEach(el => {
+        const parent = el.closest('.sidebar-item');
+        if (!parent) return;
+        const text = parent.textContent;
+        if (text.includes('待剪辑确认')) el.textContent = stats.pending;
+        else if (text.includes('已交付运营')) el.textContent = stats.delivered;
+        else if (text.includes('已上线归档')) el.textContent = stats.archived;
+        // Beta 标签不更新
+    });
+}
+
+// ========================================
 // 初始化
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
@@ -548,4 +564,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!localStorage.getItem(PROJECTS_KEY)) {
         initAllProjectsData();
     }
+    // 所有页面同步侧边栏计数
+    updateSidebarCounts();
 });

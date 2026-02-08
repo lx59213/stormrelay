@@ -12,11 +12,9 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <a href="index.html" class="workspace-selector">
+                    <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
                     <div class="workspace-info">
-                        <div class="workspace-top">
-                            <img src="icon/影视飓风.png" alt="飓风接力" class="workspace-logo">
-                            <span class="workspace-name">飓风接力</span>
-                        </div>
+                        <span class="workspace-name">飓风接力</span>
                         <span class="workspace-slogan">无限进步</span>
                     </div>
                 </a>
@@ -243,8 +241,8 @@
                                 <h3 class="about-title">飓风接力</h3>
                                 <p class="about-version">版本 1.0.0 Demo · 无限进步</p>
                                 <p class="about-desc">
-                                    内容生产的接力站——让交接时间从30分钟压到5分钟，
-                                    让关键信息从"靠记忆"变成"有清单"，
+                                    内容生产的接力站——AI 写草稿，剪辑师确认，运营带着地图看视频。
+                                    降低上游的填写成本，提升下游的消费效率，
                                     让所有标注自动沉淀成可复用的内容资产。
                                 </p>
                                 <div class="about-links">
@@ -385,7 +383,7 @@
         // 更新数据统计
         function updateDataStats() {
             const projects = getAllProjects();
-            const delivered = projects.filter(p => p.project.status === 'delivered');
+            const delivered = projects.filter(p => p.status === 'delivered');
             
             document.getElementById('projectCount').textContent = projects.length;
             document.getElementById('deliveredCount').textContent = delivered.length;
