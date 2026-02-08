@@ -78,7 +78,7 @@ AI 看视频写结构化草稿 → 剪辑师扫两分钟确认「对不对」→
 
 ### 5. 知识图谱（Beta · Phase 4 愿景）
 
-![知识图谱](screenshots/06_knowledge.png)
+![知识图谱](screenshots/06_knowledge_map.png)
 
 基于 GraphRAG 构建跨视频的知识网络：
 
