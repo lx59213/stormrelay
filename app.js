@@ -16,12 +16,17 @@ const CONFIG = {
 // 项目数据存储
 // ========================================
 const PROJECTS_KEY = 'stormrelay_projects_v2';
+const DATA_VERSION_KEY = 'stormrelay_data_version';
+const CURRENT_DATA_VERSION = 4;
 
 // 获取所有项目
 function getAllProjects() {
     const data = localStorage.getItem(PROJECTS_KEY);
-    if (!data) {
+    const version = parseInt(localStorage.getItem(DATA_VERSION_KEY) || '0');
+    
+    if (!data || version < CURRENT_DATA_VERSION) {
         initAllProjectsData();
+        localStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
         return JSON.parse(localStorage.getItem(PROJECTS_KEY));
     }
     return JSON.parse(data);
@@ -76,6 +81,225 @@ function updateProjectStatus(id, newStatus) {
 // ========================================
 function initAllProjectsData() {
     const fullProjects = [
+        // ========== 真实项目：零下25度（电商视角演示） ==========
+        {
+            id: "snow-25-demo",
+            title: "零下25度，我和百万设备谁先挂……",
+            duration: "17:28",
+            status: "delivered",
+            createdAt: "2026-02-09",
+            deliveredAt: "2026-02-09",
+            archivedAt: null,
+            isReal: true,
+            videoSrc: "./零下25度，我和百万设备谁先挂…… - 1.零下25度，我和百万设备谁先挂……(Av116062414708048,P1).mp4",
+            
+            corePosition: {
+                content: "影视飓风雪地生存100小时直播的幕后技术拆解，展示极寒环境下的设备选型、信号传输方案和制片流程。",
+                status: "confirmed"
+            },
+            
+            sellingPoints: [
+                { id: 1, content: "零下30度极寒环境全设备实测，消费级设备40分钟全灭", status: "confirmed", source: "tech", sourceNote: "自研测试方案" },
+                { id: 2, content: "自研保温衣采用3M科技棉+急救毯内衬，潮湿状态仍保温", status: "confirmed", source: "self", sourceNote: "STORMCREW 出品" },
+                { id: 3, content: "iPhone 17 Pro + Snap滤镜系统零下30度手机直出电影感", status: "confirmed", source: "self", sourceNote: "STORMCREW 出品" },
+                { id: 4, content: "ST2110标准+双路48芯光纤实现1.3公里雪地信号传输", status: "ai", source: "tech", sourceNote: "自研传输方案" },
+                { id: 5, content: "舒尔DL4无振膜麦克风抗低温抗水，极寒音频采集可靠", status: "ai", source: "thirdparty", sourceNote: "舒尔（友商）" },
+                { id: 6, content: "全链路数据可视化：气象站+Apple Watch心率实时叠加直播画面", status: "ai", source: "tech", sourceNote: "自研中间件" },
+                { id: 7, content: "大疆FlyCart 100运载无人机80kg载重解决极寒物资投送", status: "ai", source: "partner", sourceNote: "大疆合作" }
+            ],
+            
+            timestamps: [
+                { id: 1, time: "00:00", seconds: 0, description: "开场：雪地生存项目概述与团队规模", usage: "核心内容", status: "confirmed" },
+                { id: 2, time: "00:42", seconds: 42, description: "项目动机：商业合作+1000小时直播远景", usage: "战略背景", status: "confirmed" },
+                { id: 3, time: "01:18", seconds: 78, description: "三大难点预告：极寒、传输、制片", usage: "结构导览", status: "ai" },
+                { id: 4, time: "01:38", seconds: 98, description: "极寒挑战：所有消费级设备40分钟全灭", usage: "冲突点·封面素材", status: "confirmed" },
+                { id: 5, time: "02:50", seconds: 170, description: "POE供电+加热玻璃方案解决设备存活", usage: "技术方案", status: "ai" },
+                { id: 6, time: "03:22", seconds: 202, description: "人比设备更脆弱——引出保温衣", usage: "产品引入·电商", status: "confirmed" },
+                { id: 7, time: "04:05", seconds: 245, description: "保温衣面料详解：3M科技棉 vs 羽绒", usage: "产品卖点·电商核心", status: "confirmed" },
+                { id: 8, time: "04:22", seconds: 262, description: "保温衣售卖讨论：2026年底可能量产", usage: "电商线索", status: "ai" },
+                { id: 9, time: "05:05", seconds: 305, description: "【广告】奥迪E5后援保障车介绍", usage: "商业植入·跳过", status: "confirmed" },
+                { id: 10, time: "05:56", seconds: 356, description: "传输篇开始：电力保障双发电机方案", usage: "技术深度", status: "ai" },
+                { id: 11, time: "06:59", seconds: 419, description: "音频方案：舒尔DL4无振膜麦克风", usage: "技术深度", status: "ai" },
+                { id: 12, time: "08:07", seconds: 487, description: "z cam P2R1远程变焦相机新尝试", usage: "技术创新", status: "ai" },
+                { id: 13, time: "08:39", seconds: 519, description: "移动机位：iPhone 17 Pro + Snap滤镜系统", usage: "产品卖点·电商", status: "confirmed" },
+                { id: 14, time: "09:32", seconds: 572, description: "5G+TVU Anywhere专业直播解决方案", usage: "技术方案", status: "ai" },
+                { id: 15, time: "10:01", seconds: 601, description: "ST2110+双路光纤信号传输架构", usage: "技术深度", status: "ai" },
+                { id: 16, time: "11:04", seconds: 664, description: "【广告】奥迪E5山路运输能力", usage: "商业植入·跳过", status: "confirmed" },
+                { id: 17, time: "11:36", seconds: 696, description: "大疆FlyCart 100运载无人机物资投送", usage: "技术方案", status: "ai" },
+                { id: 18, time: "12:26", seconds: 746, description: "制片篇：总制片的复杂协调工作", usage: "团队协作", status: "ai" },
+                { id: 19, time: "13:55", seconds: 835, description: "数据可视化：气象站+心率+弹幕投票实时上屏", usage: "技术创新·亮点", status: "ai" },
+                { id: 20, time: "15:21", seconds: 921, description: "东北虎预案：讲究幽默是安全暗号", usage: "趣味点·社媒素材", status: "ai" },
+                { id: 21, time: "15:51", seconds: 951, description: "神笔马良AI赛制：AI识别画作+实物投送", usage: "赛制创新", status: "ai" },
+                { id: 22, time: "17:08", seconds: 1028, description: "结尾总结+致谢", usage: "结尾引用", status: "confirmed" }
+            ],
+            
+            cautions: [
+                { id: 1, content: "视频含奥迪E5植入广告（05:05-05:56, 11:04-11:36）", level: "medium", action: "运营发布时注明商业合作，电商素材绕开广告段", status: "confirmed" },
+                { id: 2, content: "保温衣尚未正式发售，视频提及2026年底计划", level: "medium", action: "电商文案标注'预售/开发中'，不做确定性承诺", status: "ai" },
+                { id: 3, content: "iPhone零下30度不死机可能引发'手机比人耐冻'段子", level: "low", action: "可作为社媒传播点，但不宜过度强调避免品牌风险", status: "ai" },
+                { id: 4, content: "舒尔DL4为友商产品，不宜在电商素材中重点推荐", level: "low", action: "技术拆解可提及，电商场景中淡化处理", status: "ai" }
+            ],
+            
+            notes: [
+                { id: 1, author: "剪辑师", time: "2月9日", content: "保温衣片段(04:05-04:22)是电商团队最需要的素材，Tim正面半身讲解面料很有说服力。建议电商团队优先处理。" },
+                { id: 2, author: "运营", time: "2月9日", content: "Snap滤镜系统在极寒中的表现可以做3C产品主图的场景图。东北虎暗号'讲究幽默'可以做社媒传播。" },
+                { id: 3, author: "电商运营", time: "2月10日", content: "保温衣详情页缺竖屏素材，横屏裁切后主体偏移严重。下次拍摄请预留竖屏安全构图。" },
+                { id: 4, author: "AI 助手", time: "自动", content: "检测到两段奥迪E5商业植入(05:05-05:56, 11:04-11:36)，已在时间轴标记为【广告·跳过】。电商素材提取已自动绕开。" }
+            ],
+            
+            transcript: [
+                { time: "00:00", seconds: 0, text: "如果你能看到这个视频说我们的雪地生存已经结束了，而且结果大概率还不错。所以会有这么个幕后来和你分享一下。" },
+                { time: "00:26", seconds: 26, text: "今天我们就一起来看看一个雪地直播100小时的背后是什么样的。" },
+                { time: "00:42", seconds: 42, text: "首先为什么要做这样的项目？答案就是两点。第一我们会有商业合作的机会。第二是我们未来真的想做1000小时或者更离谱的这种类型的直播。" },
+                { time: "01:18", seconds: 78, text: "这一次我们遇到的难点主要有三个，极寒、传输还有制片，这是三个非常大的坑。" },
+                { time: "01:38", seconds: 98, text: "我们发现南方人对零下30度的概念真的是太欠缺了。所有的设备直接就黑了，根本开不了机，所有的线缆都会硬的和钢筋一样。" },
+                { time: "02:04", seconds: 124, text: "大部分的相机只能够开机40分钟，然后就全部关机了。坚持最久的是索尼ZVE1，也没有超过1个小时就完全冻透了。" },
+                { time: "02:50", seconds: 170, text: "海康威视的监控还有z cam在这样的环境之下给坚持下来了。因为它们没有电池，直接通过POE供电。我们把前面的保护玻璃换成了加热玻璃。" },
+                { time: "03:22", seconds: 202, text: "我们这次发现人反而是极寒环境之下更为严峻的问题。零下30度待10个小时，身体里面的温度都会被抽走。所以我们请产品团队缝制了一件比较特殊的衣服来解决这个问题。" },
+                { time: "04:05", seconds: 245, text: "保温的材质，我没有选择羽绒，而是用了一种3M的科技棉。因为户外衣服湿是很常见的问题，羽绒会失去大部分保温能力，但科技棉在潮湿状态下还是有一定的保温效果。" },
+                { time: "04:22", seconds: 262, text: "你会想问卖不卖？答案就是目前成本还比较高，也许我们可以在2026年的年底冬季的时候把它给生产出来。" },
+                { time: "05:05", seconds: 305, text: "好在奥迪对本次的雪地生存项目非常感兴趣，他为我们提供了奥迪E5 sportback作为后援保障车。" },
+                { time: "05:56", seconds: 356, text: "我们拉了2台50千伏安的发电机到了导播中心。准备两台就是怕极寒环境之下会出现故障。事实上也确实出现了故障。" },
+                { time: "06:35", seconds: 395, text: "还好有两台，保证直播没有断掉。所有的机柜也都有UPS再来做一层防护。即便发电机失效了，整个系统也不会直接掉线。" },
+                { time: "06:59", seconds: 419, text: "音频在真人秀直播里面真的比画面更重要。胸口的麦克风我们用的是舒尔的DL4，它没有用振膜，是通过在芯片上面蚀刻出来的结构来收声，可以抗造、抗水、抗低温。" },
+                { time: "08:07", seconds: 487, text: "我们这次还增加了3台z cam的P2R1相机。它集成了变焦镜头还有云台，可以远程控制构图，从36毫米到648毫米都能容纳。" },
+                { time: "08:39", seconds: 519, text: "我们这次移动机位从action换成了iPhone 17 Pro，配合我们自己开发的手机壳，Snap滤镜系统就能够保证正常的曝光还有运动模糊。" },
+                { time: "09:32", seconds: 572, text: "我们用了5G网络配合TVU Anywhere这个软件，把iPhone变成了一台专业的一体化直播机，它能通过MTP网络给iPhone授时间，保持和专业摄影机的同步性。" },
+                { time: "10:01", seconds: 601, text: "生存现场总共架设了28个机位。这些信号汇总后通过ST2110标准和一根48芯的光纤传到总营地。这样的光缆我们铺设了两路，走了两条不同的路线。" },
+                { time: "10:32", seconds: 632, text: "我们确实在测试过程中遇到了比较恐怖的情况，就是主光缆不知道怎么被人弄断了。所以野外作业做好备份是特别核心的一点。" },
+                { time: "11:04", seconds: 664, text: "奥迪E5执行运输的关键装备，其智能四驱与后轮转向技术配合285毫米胎宽，能进一步提高行驶安全性和稳定性。" },
+                { time: "11:36", seconds: 696, text: "物资投送我们采用的是大疆的FlyCart 100运载无人机。它有80公斤的运载能力，满电只能飞十分钟，但电池十分钟就能充满。" },
+                { time: "12:26", seconds: 746, text: "制片人这里面的门道稍微有点多。无论是客户商务还是现场政府关系，什么都得来维护。" },
+                { time: "12:58", seconds: 778, text: "我们直播的画面可能仅是一个，但背后真正推出去的流至少有六条。横屏和竖屏两个版本，每个版本上有两个独立开窗。" },
+                { time: "13:55", seconds: 835, text: "我们抛弃了传统广电的数据库方案，用了全链路外化的解法。气象站抓取气候信息，Apple Watch获取心率，实时上传到接口，导播软件通过网页协议拉进来叠到画面上。" },
+                { time: "15:21", seconds: 921, text: "这一次我们发现除了人会突袭，还有东北虎可能出没。所以制片做了东北虎预案：讲究幽默讲究幽默——这就是安全暗号。" },
+                { time: "15:51", seconds: 951, text: "这次直播比较有趣的是神笔马良赛制。AI识别画作后团队立刻判断哪里能买到，从现场购买后运载无人机送达。AI作为客观裁判，让神话有了落地的可能。" },
+                { time: "17:08", seconds: 1028, text: "以上就是本期节目的全部内容，希望能和你讲得比较全一点。我们幕后遇到的问题还有解决方案。" }
+            ],
+            
+            aiSummary: {
+                topic: "雪地生存100小时直播幕后技术拆解",
+                core: "极寒环境下的全链路直播解决方案，从设备选型到信号传输到制片协调的完整方法论。",
+                highlights: "自研保温衣、Snap滤镜系统极寒表现、ST2110光纤传输、全链路数据可视化、神笔马良AI赛制创新。",
+                weaknesses: "含商业植入（奥迪E5），保温衣尚未发售。",
+                audience: "技术爱好者、直播从业者、影视制作团队。"
+            },
+            
+            // ===== 电商视角数据 =====
+            ecommerceAssets: [
+                {
+                    id: "ea-001",
+                    product: "STORMCREW 极地保温衣",
+                    timeStart: "04:05",
+                    timeEnd: "04:22",
+                    startSeconds: 245,
+                    endSeconds: 262,
+                    description: "Tim 正面半身讲解自研保温衣面料——3M科技棉替代羽绒，潮湿状态仍保温。背景为雪地营地，穿着状态自然。",
+                    thumbnail: null,
+                    tags: ["详情页场景图", "短视频切片", "种草文案素材"],
+                    source: "self",
+                    sourceNote: "STORMCREW 自有产品",
+                    translations: [
+                        { technical: "3M科技棉，潮湿状态下仍有保温效果", consumer: "雪地生存100小时实测——衣服湿了也不怕冷" },
+                        { technical: "急救毯材质内衬，替代传统羽绒方案", consumer: "和极地救援队同款面料，零下30度的最后一道防线" },
+                        { technical: "产品团队定制缝制，非量产原型", consumer: "影视飓风自用款，从百万级直播项目中诞生的户外硬核装备" }
+                    ],
+                    usability: 4,
+                    confidence: 0.92,
+                    status: "ai"
+                },
+                {
+                    id: "ea-002",
+                    product: "Snap Filter 手机滤镜系统",
+                    timeStart: "08:39",
+                    timeEnd: "09:32",
+                    startSeconds: 519,
+                    endSeconds: 572,
+                    description: "Tim 展示 iPhone 17 Pro 配合自研手机壳和 Snap 滤镜系统，在零下30度环境中实现电影感画面，并快速架设3-4个移动机位。",
+                    thumbnail: null,
+                    tags: ["产品演示视频", "3C配件主图", "使用场景图", "短视频切片"],
+                    source: "self",
+                    sourceNote: "STORMCREW 自有产品",
+                    translations: [
+                        { technical: "Snap滤镜系统保证正常曝光和运动模糊", consumer: "零下30度，手机直出电影感画面" },
+                        { technical: "配合自研手机壳可快速架设3-4个移动机位", consumer: "一部手机变专业机位，雪地户外随手拍大片" },
+                        { technical: "通过5G+TVU Anywhere实现专业级无线图传", consumer: "告别线缆束缚，手机画面秒传导播间" }
+                    ],
+                    usability: 3,
+                    confidence: 0.85,
+                    status: "ai"
+                },
+                {
+                    id: "ea-003",
+                    product: "大疆 FlyCart 100 运载无人机",
+                    timeStart: "11:36",
+                    timeEnd: "12:26",
+                    startSeconds: 696,
+                    endSeconds: 746,
+                    description: "展示大疆FlyCart 100在极寒环境中的物资投送能力，80kg载重，满电飞行10分钟，10分钟充满。",
+                    thumbnail: null,
+                    tags: ["合作方产品", "使用场景参考"],
+                    source: "partner",
+                    sourceNote: "大疆合作方",
+                    translations: [
+                        { technical: "80kg运载能力，满电飞行10分钟", consumer: "雪地物资空投神器——10分钟一趟，不停机高频投送" },
+                        { technical: "空调系统控制绳索收缩和挂钩开合", consumer: "精准空投到你面前，不用满雪地找包裹" }
+                    ],
+                    usability: 2,
+                    confidence: 0.78,
+                    status: "ai"
+                }
+            ],
+            
+            shootingAdvice: {
+                summary: {
+                    assetCount: 3,
+                    totalDuration: "约1分43秒",
+                    usabilityRating: "中等偏上",
+                    usabilityNote: "自有产品2条可直接用于电商，合作方产品1条需授权标注"
+                },
+                suggestions: [
+                    {
+                        id: "sa-001",
+                        title: "保温衣：缺少产品细节特写",
+                        detail: "面料质感、急救毯内衬反光效果、缝合工艺等细节未有单独镜头。建议下次拍摄时补3-5秒产品细节B-roll，可直接用于详情页。",
+                        timeRef: "04:05",
+                        seconds: 245,
+                        status: "pending"
+                    },
+                    {
+                        id: "sa-002",
+                        title: "Snap滤镜：产品本体出镜不足",
+                        detail: "视频重点讲了Snap的效果（曝光、运动模糊），但滤镜本体（手机壳+滤镜片）未有正面展示。建议使用前增加2-3秒产品安装过程镜头。",
+                        timeRef: "08:39",
+                        seconds: 519,
+                        status: "pending"
+                    },
+                    {
+                        id: "sa-003",
+                        title: "IP人物与产品关联度可以更强",
+                        detail: "Tim穿着保温衣但画面以设备讲解为主。建议极端环境测试场景中增加\"人+产品\"构图——例如Tim在暴风雪中拉上保温衣拉链的特写。",
+                        timeRef: "03:22",
+                        seconds: 202,
+                        status: "pending"
+                    },
+                    {
+                        id: "sa-004",
+                        title: "电商预留竖屏构图",
+                        detail: "频道视频以横屏为主，但电商详情页多为竖屏。建议关键产品镜头多留竖屏安全构图，方便后期裁切不丢失主体。",
+                        timeRef: "04:05",
+                        seconds: 245,
+                        status: "pending"
+                    }
+                ],
+                estimatedValue: {
+                    detailPageImages: "2-3张（保温衣场景图 + Snap使用场景图）",
+                    shortVideoClips: "1条15秒（保温衣极寒实测切片）",
+                    xiaohongshuMaterial: "3-5条（极寒穿搭 / 手机摄影装备 / 户外生存好物）"
+                }
+            }
+        },
+        
         // ========== 真实项目：佳能C50 ==========
         {
             id: "c50-real",
@@ -489,7 +713,9 @@ function initAllProjectsData() {
 // ========================================
 function resetAllData() {
     localStorage.removeItem(PROJECTS_KEY);
+    localStorage.removeItem(DATA_VERSION_KEY);
     initAllProjectsData();
+    localStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
 }
 
 // ========================================
@@ -557,13 +783,144 @@ function updateSidebarCounts() {
 }
 
 // ========================================
+// Skill 沉淀系统（供 knowledge.html 读取）
+// ========================================
+// Skill = 一套完整打法：什么时候触发 → 怎么做 → 预期结果
+// 从项目实操中固化，人可编辑/冻结/删除/导出
+const SKILLS_STORAGE_KEY = 'stormrelay_skills';
+
+function getSkills() {
+    const stored = localStorage.getItem(SKILLS_STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+    const defaults = getDefaultSkills();
+    saveSkills(defaults);
+    return defaults;
+}
+
+function saveSkills(skills) {
+    localStorage.setItem(SKILLS_STORAGE_KEY, JSON.stringify(skills));
+}
+
+function getDefaultSkills() {
+    return [
+        {
+            id: "skill-001",
+            name: "高价值电商素材识别",
+            level: "mid",
+            frozen: false,
+            trigger: "视频中出现 IP人物 + 自有产品 + 极端/反差环境",
+            steps: [
+                "定位产品出镜时间段（AI 时间轴标记）",
+                "提取人物正面半身 + 产品可见的帧作为候选主图",
+                "标记出品方为'自有品牌'，优先进入电商素材队列"
+            ],
+            expected: "产出 2-3 张可用详情页场景图，缩短电商团队选图时间 60%",
+            confidence: 0.92,
+            appliedCount: 3,
+            origin: "human_confirmed",
+            evolveLog: [
+                { date: "2026-02-09", event: "AI 从零下25度项目提取，初始置信度 0.75", type: "created" },
+                { date: "2026-02-09", event: "电商运营确认保温衣片段(ea-001)素材可用", type: "confirmed" },
+                { date: "2026-02-10", event: "运营反馈：环境反差越大素材转化率越高，修正触发条件", type: "edited" }
+            ],
+            sourceProject: "零下25度"
+        },
+        {
+            id: "skill-002",
+            name: "技术参数→消费者语言翻译",
+            level: "bottom",
+            frozen: false,
+            trigger: "电商素材卡片中存在技术参数描述（如'3M科技棉'、'ST2110标准'）",
+            steps: [
+                "识别技术术语和指标数据",
+                "生成场景化消费者语言（用结果而非参数：'湿了也暖' 而非 '科技棉'）",
+                "保留技术原文作为参考，双栏对照展示"
+            ],
+            expected: "场景化描述点击率比指标描述高 2.3 倍（基于编辑行为统计）",
+            confidence: 0.87,
+            appliedCount: 7,
+            origin: "ai_discovered",
+            evolveLog: [
+                { date: "2026-02-09", event: "AI 统计电商运营编辑行为，发现场景化改写被保留概率显著更高", type: "created" },
+                { date: "2026-02-10", event: "跨 3 个项目验证，规律成立，升级为底层 Skill", type: "upgraded" }
+            ],
+            sourceProject: "多项目交叉验证"
+        },
+        {
+            id: "skill-003",
+            name: "商业植入段自动规避",
+            level: "bottom",
+            frozen: false,
+            trigger: "视频时间轴中检测到商业植入标记（cautions.level=medium 且含'广告'关键词）",
+            steps: [
+                "标记植入时间段为'跳过'区域",
+                "电商素材提取自动绕开该时间段",
+                "若产品出镜与广告段重叠 >50%，降低该素材优先级并标注风险"
+            ],
+            expected: "避免电商素材与广告内容混淆，降低品牌合规风险",
+            confidence: 0.95,
+            appliedCount: 2,
+            origin: "human_corrected",
+            evolveLog: [
+                { date: "2026-02-09", event: "AI 初版未区分广告段，电商运营手动标注奥迪E5段为'跳过'", type: "created" },
+                { date: "2026-02-10", event: "人工修正：阈值从20秒调整为30秒，避免误伤短口播", type: "edited" }
+            ],
+            sourceProject: "零下25度 + C50"
+        },
+        {
+            id: "skill-004",
+            name: "竖屏安全构图预检",
+            level: "surface",
+            frozen: false,
+            trigger: "电商素材标记为'详情页场景图'或'主图候选'",
+            steps: [
+                "检测产品出镜段的画面主体位置",
+                "若横屏裁切为竖屏后主体偏移 >30%，标记'需裁切注意'",
+                "生成拍摄建议：下次预留竖屏安全构图"
+            ],
+            expected: "减少电商团队返工裁图时间，反向优化拍摄策略",
+            confidence: 0.78,
+            appliedCount: 1,
+            origin: "ai_discovered",
+            evolveLog: [
+                { date: "2026-02-10", event: "AI 分析拍摄建议采纳率，发现竖屏构图建议被采纳概率最高", type: "created" }
+            ],
+            sourceProject: "零下25度"
+        },
+        {
+            id: "skill-005",
+            name: "友商产品自动降级",
+            level: "mid",
+            frozen: false,
+            trigger: "电商素材的 source 字段为 'thirdparty'（友商产品）",
+            steps: [
+                "将该素材从推荐队列移至'仅参考'分组",
+                "卡片显示灰色友商标签，不出现在默认导出清单中",
+                "如需导出须手动勾选确认"
+            ],
+            expected: "避免在自有电商渠道中错误推荐竞品，保护品牌一致性",
+            confidence: 0.91,
+            appliedCount: 4,
+            origin: "human_corrected",
+            evolveLog: [
+                { date: "2026-02-09", event: "AI 初版将舒尔DL4推入电商素材队列", type: "created" },
+                { date: "2026-02-09", event: "电商运营反馈：友商产品不应进入推荐，修正为自动降级", type: "edited" },
+                { date: "2026-02-10", event: "验证大疆FlyCart（合作方）不受影响，规则边界清晰", type: "confirmed" }
+            ],
+            sourceProject: "零下25度"
+        }
+    ];
+}
+
+// ========================================
 // 初始化
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
-    // 确保数据存在
-    if (!localStorage.getItem(PROJECTS_KEY)) {
+    // 版本检测：数据不存在或版本过旧则重新初始化
+    const version = parseInt(localStorage.getItem(DATA_VERSION_KEY) || '0');
+    if (!localStorage.getItem(PROJECTS_KEY) || version < CURRENT_DATA_VERSION) {
         initAllProjectsData();
+        localStorage.setItem(DATA_VERSION_KEY, String(CURRENT_DATA_VERSION));
     }
-    // 所有页面同步侧边栏计数
     updateSidebarCounts();
 });

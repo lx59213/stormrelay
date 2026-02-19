@@ -737,6 +737,29 @@ a {
     color: var(--text-tertiary);
 }
 
+.form-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--bg-white);
+    transition: all 0.15s;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.1);
+}
+
 .form-textarea {
     min-height: 120px;
     resize: vertical;
@@ -1847,4 +1870,281 @@ a {
         align-items: center;
         text-align: center;
     }
+}
+
+/* ========================================
+   电商视角专用样式
+   ======================================== */
+
+.ecommerce-card {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+}
+
+.ecommerce-card:hover {
+    border-color: #10B981;
+}
+
+.ecommerce-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #F0FDF4;
+    border-bottom: 1px solid #D1FAE5;
+}
+
+.ecommerce-card-product {
+    font-size: 14px;
+    font-weight: 600;
+    color: #065F46;
+}
+
+.ecommerce-card-time {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 12px;
+    color: #047857;
+    background: #D1FAE5;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.ecommerce-card-body {
+    padding: 16px;
+}
+
+.ecommerce-card-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.ecommerce-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.ecommerce-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #ECFDF5;
+    color: #065F46;
+    font-weight: 500;
+}
+
+.translation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+}
+
+.translation-table th {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-align: left;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.translation-table td {
+    font-size: 12px;
+    padding: 8px;
+    line-height: 1.5;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: top;
+}
+
+.translation-table .tech-col {
+    color: var(--text-secondary);
+    width: 45%;
+}
+
+.translation-table .arrow-col {
+    color: var(--text-tertiary);
+    width: 10%;
+    text-align: center;
+}
+
+.translation-table .consumer-col {
+    color: #065F46;
+    font-weight: 500;
+    width: 45%;
+}
+
+.ecommerce-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.ecommerce-stars {
+    color: #F59E0B;
+    letter-spacing: 1px;
+}
+
+.confidence-badge {
+    background: #EEF2FF;
+    color: #4338CA;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.shooting-advice-section {
+    padding: 16px;
+}
+
+.advice-summary {
+    background: #F0FDF4;
+    border: 1px solid #D1FAE5;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.advice-summary-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #065F46;
+    margin-bottom: 8px;
+}
+
+.advice-summary-stats {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.advice-item {
+    padding: 12px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border-left: 3px solid #10B981;
+}
+
+.advice-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.advice-item-detail {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.advice-value {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.advice-value-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #92400E;
+    margin-bottom: 8px;
+}
+
+.advice-value-list {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 2;
+}
+
+.view-indicator-dot.ecommerce { background: #10B981; }
+
+.marker-ecommerce { background: #10B981; }
+
+.ecommerce-card.active {
+    border-color: #059669;
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+}
+
+.ecommerce-source-tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.6;
+    white-space: nowrap;
+}
+
+.ecommerce-status-tag {
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
+.rule-hint {
+    padding: 6px 16px 10px;
+    font-size: 11px;
+    color: #7C3AED;
+    background: #F5F3FF;
+    border-top: 1px solid #EDE9FE;
+    transition: opacity 0.3s;
+}
+
+.rule-hint.hidden { display: none; }
+
+.advice-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.advice-item-time {
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 11px;
+    color: #059669;
+    background: #D1FAE5;
+    padding: 1px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.advice-item-time:hover {
+    background: #A7F3D0;
+}
+
+.advice-adopted-tag {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #059669;
+    font-weight: 500;
+}
+
+.ecommerce-empty {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
+.ecommerce-empty h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text-secondary);
 }

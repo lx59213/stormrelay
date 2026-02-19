@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飓风接力 · 知识图谱</title>
+    <title>飓风接力 · Skill 工作台</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -62,8 +62,8 @@
                         <span>内容分析</span>
                     </a>
                     <a href="knowledge.html" class="sidebar-item active">
-                        <span class="sidebar-item-icon">🧠</span>
-                        <span>知识图谱</span>
+                        <span class="sidebar-item-icon">🧬</span>
+                        <span>Skill 工作台</span>
                         <span class="sidebar-item-count">Beta</span>
                     </a>
                 </div>
@@ -83,201 +83,450 @@
         <main class="main-content">
             <header class="main-header">
                 <div class="main-header-left">
-                    <h1 class="page-title">知识图谱</h1>
-                    <span class="beta-badge">Beta</span>
+                    <h1 class="page-title">Skill 工作台</h1>
+                    <span class="sk-badge">越用越准</span>
+                </div>
+                <div class="main-header-right">
+                    <button class="sk-action-btn" onclick="exportJSON()">导出 JSON</button>
+                    <button class="sk-action-btn" onclick="exportPrompt()">导出 Prompt</button>
+                    <label class="sk-action-btn" style="cursor:pointer;">导入
+                        <input type="file" accept=".json" onchange="importSkills(event)" style="display:none;">
+                    </label>
                 </div>
             </header>
             
             <div class="content-area">
-                <!-- Beta 提示 -->
-                <div class="beta-notice">
-                    <div class="beta-notice-icon">🧠</div>
-                    <div class="beta-notice-content">
-                        <h3>知识图谱 · Phase 4 愿景</h3>
-                        <p>
-                            基于 GraphRAG 技术，将所有项目的 AI 提取结果（产品实体、卖点、风险点、时间线）
-                            构建为跨视频的知识网络。从单视频交接扩展到组织级的内容智能——
-                            让信息不止服务一次交接，而是成为可复用、可追溯、可推理的内容资产。
-                        </p>
+                <!-- 核心说明 -->
+                <div class="sk-intro">
+                    <div class="sk-intro-icon">🧬</div>
+                    <div class="sk-intro-text">
+                        <strong>Skill = 从实战中固化的最优打法</strong>
+                        <span>每条 Skill 包含触发条件、执行步骤、预期结果。从项目操作中自动提炼，人可随时编辑、冻结、删除。可导出为飞书字段或 AI Prompt，融入现有工作流。</span>
                     </div>
                 </div>
                 
-                <!-- 规划功能 -->
-                <div class="feature-preview">
-                    <h2 class="feature-preview-title">愿景功能</h2>
-                    
-                    <div class="feature-grid">
-                        <div class="feature-card">
-                            <div class="feature-icon">🔗</div>
-                            <h4>产品实体追踪</h4>
-                            <p>跨视频追踪同一产品的评价变化，如"佳能C50在所有视频中的评价汇总"</p>
+                <!-- 统计栏 -->
+                <div class="sk-stats">
+                    <div class="sk-stat"><span class="sk-stat-val" id="statActive">0</span><span class="sk-stat-lbl">活跃</span></div>
+                    <div class="sk-stat"><span class="sk-stat-val" id="statFrozen">0</span><span class="sk-stat-lbl">已冻结</span></div>
+                    <div class="sk-stat"><span class="sk-stat-val" id="statApplied">0</span><span class="sk-stat-lbl">累计应用</span></div>
+                    <div class="sk-stat"><span class="sk-stat-val" id="statAvgConf">0%</span><span class="sk-stat-lbl">平均置信度</span></div>
+                </div>
+                
+                <!-- 三列能力树 -->
+                <div class="sk-tree">
+                    <div class="sk-tree-col" data-level="bottom">
+                        <div class="sk-tree-header bottom">
+                            <span class="sk-tree-title">底层 Skill</span>
+                            <span class="sk-tree-desc">跨场景通用，复用价值最高</span>
                         </div>
-                        
-                        <div class="feature-card">
-                            <div class="feature-icon">⚖️</div>
-                            <h4>内容一致性检查</h4>
-                            <p>检测电商短视频文案与频道评测是否矛盾，避免口径不一致的风险</p>
+                        <div class="sk-tree-list" id="treeBottom"></div>
+                    </div>
+                    <div class="sk-tree-col" data-level="mid">
+                        <div class="sk-tree-header mid">
+                            <span class="sk-tree-title">中层 Skill</span>
+                            <span class="sk-tree-desc">特定品类/团队经验</span>
                         </div>
-                        
-                        <div class="feature-card">
-                            <div class="feature-icon">📚</div>
-                            <h4>历史经验推荐</h4>
-                            <p>基于图谱关联推荐："上次类似产品的注意事项有哪些"</p>
+                        <div class="sk-tree-list" id="treeMid"></div>
+                    </div>
+                    <div class="sk-tree-col" data-level="surface">
+                        <div class="sk-tree-header surface">
+                            <span class="sk-tree-title">表层 Skill</span>
+                            <span class="sk-tree-desc">操作级优化，可能过时</span>
                         </div>
-                        
-                        <div class="feature-card">
-                            <div class="feature-icon">🔍</div>
-                            <h4>语义搜索</h4>
-                            <p>跨项目搜索相关内容，如"所有提到性价比的视频"或"无防抖的相机"</p>
-                        </div>
+                        <div class="sk-tree-list" id="treeSurface"></div>
                     </div>
                 </div>
                 
-                <!-- 图谱预览 -->
-                <div class="graph-preview">
-                    <h2 class="feature-preview-title">图谱预览</h2>
-                    <div class="graph-placeholder">
-                        <svg width="100%" height="300" viewBox="0 0 600 300">
-                            <!-- 节点 -->
-                            <circle cx="300" cy="150" r="40" fill="#5E6AD2" opacity="0.8"/>
-                            <text x="300" y="155" text-anchor="middle" fill="white" font-size="12">佳能C50</text>
-                            
-                            <circle cx="150" cy="80" r="25" fill="#F59E0B" opacity="0.8"/>
-                            <text x="150" y="85" text-anchor="middle" fill="white" font-size="10">7K画质</text>
-                            
-                            <circle cx="450" cy="80" r="25" fill="#F59E0B" opacity="0.8"/>
-                            <text x="450" y="85" text-anchor="middle" fill="white" font-size="10">直播推流</text>
-                            
-                            <circle cx="150" cy="220" r="25" fill="#10B981" opacity="0.8"/>
-                            <text x="150" y="225" text-anchor="middle" fill="white" font-size="10">性价比</text>
-                            
-                            <circle cx="450" cy="220" r="25" fill="#EF4444" opacity="0.8"/>
-                            <text x="450" y="225" text-anchor="middle" fill="white" font-size="10">无防抖</text>
-                            
-                            <circle cx="80" cy="150" r="20" fill="#8B5CF6" opacity="0.6"/>
-                            <text x="80" y="155" text-anchor="middle" fill="white" font-size="9">Vlog</text>
-                            
-                            <circle cx="520" cy="150" r="20" fill="#8B5CF6" opacity="0.6"/>
-                            <text x="520" y="155" text-anchor="middle" fill="white" font-size="9">带货</text>
-                            
-                            <!-- 连线 -->
-                            <line x1="260" y1="130" x2="175" y2="95" stroke="#E8E8E8" stroke-width="2"/>
-                            <line x1="340" y1="130" x2="425" y2="95" stroke="#E8E8E8" stroke-width="2"/>
-                            <line x1="260" y1="170" x2="175" y2="205" stroke="#E8E8E8" stroke-width="2"/>
-                            <line x1="340" y1="170" x2="425" y2="205" stroke="#E8E8E8" stroke-width="2"/>
-                            <line x1="100" y1="150" x2="260" y2="150" stroke="#E8E8E8" stroke-width="1" stroke-dasharray="4"/>
-                            <line x1="340" y1="150" x2="500" y2="150" stroke="#E8E8E8" stroke-width="1" stroke-dasharray="4"/>
-                        </svg>
-                    </div>
+                <!-- AI 自省建议 -->
+                <div class="sk-ai-section">
+                    <div class="sk-section-title">🔍 AI 自省建议</div>
+                    <div id="aiSuggestions"></div>
                 </div>
             </div>
         </main>
     </div>
     
+    <!-- 编辑弹窗 -->
+    <div class="sk-modal-overlay hidden" id="skModal">
+        <div class="sk-modal">
+            <div class="sk-modal-title" id="skModalTitle">编辑 Skill</div>
+            <div class="sk-modal-body">
+                <label>名称</label>
+                <input type="text" id="skName" class="sk-input">
+                <label>触发条件</label>
+                <textarea id="skTrigger" class="sk-input" rows="2"></textarea>
+                <label>执行步骤（每行一步）</label>
+                <textarea id="skSteps" class="sk-input" rows="4"></textarea>
+                <label>预期结果</label>
+                <textarea id="skExpected" class="sk-input" rows="2"></textarea>
+                <label>层级</label>
+                <select id="skLevel" class="sk-input">
+                    <option value="bottom">底层 — 跨场景通用</option>
+                    <option value="mid">中层 — 品类/团队经验</option>
+                    <option value="surface">表层 — 操作级优化</option>
+                </select>
+            </div>
+            <div class="sk-modal-footer">
+                <button class="sk-btn secondary" onclick="closeSkModal()">取消</button>
+                <button class="sk-btn primary" onclick="saveSkEdit()">保存</button>
+            </div>
+        </div>
+    </div>
+    
     <style>
-        .beta-badge {
-            background: #8B5CF6;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            margin-left: 8px;
-        }
+        /* ---- badge & intro ---- */
+        .sk-badge { background:#7C3AED; color:#fff; padding:2px 8px; border-radius:4px; font-size:11px; margin-left:8px; }
+        .main-header-right { display:flex; gap:8px; align-items:center; }
+        .sk-action-btn { background:var(--bg-white); border:1px solid var(--border-color); border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer; color:var(--text-secondary); transition:all .15s; }
+        .sk-action-btn:hover { border-color:#7C3AED; color:#7C3AED; }
         
-        .beta-notice {
-            display: flex;
-            gap: 20px;
-            padding: 24px;
-            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-            border-radius: 12px;
-            margin-bottom: 32px;
-        }
+        .sk-intro { display:flex; gap:16px; align-items:flex-start; padding:16px 20px; background:linear-gradient(135deg,#F5F3FF,#EDE9FE); border-radius:10px; margin-bottom:20px; }
+        .sk-intro-icon { font-size:32px; flex-shrink:0; }
+        .sk-intro-text { font-size:13px; color:var(--text-secondary); line-height:1.6; }
+        .sk-intro-text strong { display:block; font-size:15px; color:#5B21B6; margin-bottom:4px; }
         
-        .beta-notice-icon {
-            font-size: 48px;
-        }
+        /* ---- stats ---- */
+        .sk-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+        .sk-stat { background:var(--bg-white); border:1px solid var(--border-color); border-radius:8px; padding:14px; text-align:center; }
+        .sk-stat-val { display:block; font-size:24px; font-weight:700; color:#7C3AED; }
+        .sk-stat-lbl { font-size:11px; color:var(--text-tertiary); }
         
-        .beta-notice-content h3 {
-            font-size: 18px;
-            margin-bottom: 8px;
-        }
+        /* ---- tree ---- */
+        .sk-tree { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+        .sk-tree-col { min-height:200px; }
+        .sk-tree-header { padding:10px 14px; border-radius:8px 8px 0 0; }
+        .sk-tree-header.bottom { background:#FEF3C7; border-bottom:2px solid #F59E0B; }
+        .sk-tree-header.mid { background:#DBEAFE; border-bottom:2px solid #3B82F6; }
+        .sk-tree-header.surface { background:#F3F4F6; border-bottom:2px solid #9CA3AF; }
+        .sk-tree-title { font-size:13px; font-weight:700; display:block; }
+        .sk-tree-desc { font-size:11px; color:var(--text-tertiary); }
+        .sk-tree-list { padding:8px 0; }
         
-        .beta-notice-content p {
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
+        /* ---- skill card ---- */
+        .sk-card { background:var(--bg-white); border:1px solid var(--border-color); border-radius:8px; margin-bottom:10px; overflow:hidden; transition:border-color .15s, opacity .15s; }
+        .sk-card:hover { border-color:#7C3AED; }
+        .sk-card.frozen { opacity:.55; }
+        .sk-card.frozen .sk-card-name::after { content:' 🔒'; }
         
-        .feature-preview {
-            margin-bottom: 32px;
-        }
+        .sk-card-top { padding:12px 14px 8px; cursor:pointer; }
+        .sk-card-name { font-size:13px; font-weight:600; color:var(--text-primary); margin-bottom:4px; }
+        .sk-card-trigger { font-size:11px; color:var(--text-tertiary); line-height:1.4; }
+        .sk-card-mini-meta { display:flex; gap:10px; margin-top:6px; font-size:10px; color:var(--text-tertiary); }
         
-        .feature-preview-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
+        /* ---- expanded detail (渐进式披露) ---- */
+        .sk-card-detail { display:none; padding:0 14px 12px; border-top:1px solid var(--border-color); margin-top:8px; padding-top:10px; }
+        .sk-card.expanded .sk-card-detail { display:block; }
         
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-        }
+        .sk-detail-section { margin-bottom:10px; }
+        .sk-detail-label { font-size:10px; font-weight:700; color:#7C3AED; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+        .sk-detail-steps { padding-left:16px; font-size:12px; color:var(--text-secondary); line-height:1.8; }
+        .sk-detail-steps li { margin-bottom:2px; }
+        .sk-detail-expected { font-size:12px; color:var(--text-secondary); line-height:1.5; background:#F5F3FF; padding:8px 10px; border-radius:6px; }
         
-        .feature-card {
-            background: var(--bg-white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
+        .sk-evolve-log { font-size:11px; color:var(--text-tertiary); line-height:1.8; }
+        .sk-evolve-dot { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+        .sk-evolve-dot.created { background:#3B82F6; }
+        .sk-evolve-dot.confirmed { background:#10B981; }
+        .sk-evolve-dot.edited { background:#F59E0B; }
+        .sk-evolve-dot.upgraded { background:#7C3AED; }
         
-        .feature-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
+        .sk-card-actions { display:flex; gap:6px; padding:8px 14px; border-top:1px solid var(--border-color); background:var(--bg-primary); }
+        .sk-card-actions button { font-size:11px; padding:3px 10px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); cursor:pointer; color:var(--text-secondary); transition:all .15s; }
+        .sk-card-actions button:hover { border-color:#7C3AED; color:#7C3AED; }
+        .sk-card-actions button.danger:hover { border-color:#EF4444; color:#EF4444; }
         
-        .feature-card h4 {
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
+        /* ---- confidence bar ---- */
+        .sk-conf-bar { width:50px; height:3px; background:#E5E7EB; border-radius:2px; display:inline-block; vertical-align:middle; margin-left:4px; }
+        .sk-conf-fill { height:100%; border-radius:2px; background:#7C3AED; }
         
-        .feature-card p {
-            font-size: 12px;
-            color: var(--text-tertiary);
-            line-height: 1.5;
-        }
+        /* ---- AI suggestions ---- */
+        .sk-ai-section { margin-bottom:32px; }
+        .sk-section-title { font-size:14px; font-weight:600; margin-bottom:12px; color:var(--text-primary); }
+        .sk-suggest { background:var(--bg-white); border:1px solid var(--border-color); border-radius:8px; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between; }
+        .sk-suggest-text { font-size:12px; color:var(--text-secondary); line-height:1.5; flex:1; }
+        .sk-suggest-actions { display:flex; gap:6px; margin-left:12px; flex-shrink:0; }
+        .sk-suggest-actions button { font-size:11px; padding:3px 10px; border:1px solid var(--border-color); border-radius:4px; background:var(--bg-white); cursor:pointer; }
         
-        .graph-preview {
-            background: var(--bg-white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-        }
+        /* ---- modal ---- */
+        .sk-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:1000; }
+        .sk-modal-overlay.hidden { display:none; }
+        .sk-modal { background:var(--bg-white); border-radius:12px; padding:24px; width:520px; max-height:80vh; overflow-y:auto; }
+        .sk-modal-title { font-size:16px; font-weight:700; margin-bottom:16px; }
+        .sk-modal-body label { display:block; font-size:11px; font-weight:600; color:var(--text-tertiary); margin:10px 0 4px; text-transform:uppercase; letter-spacing:.5px; }
+        .sk-input { width:100%; padding:8px 10px; border:1px solid var(--border-color); border-radius:6px; font-size:13px; font-family:inherit; resize:vertical; box-sizing:border-box; }
+        .sk-input:focus { outline:none; border-color:#7C3AED; }
+        .sk-modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:16px; }
+        .sk-btn { padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; border:none; }
+        .sk-btn.primary { background:#7C3AED; color:#fff; }
+        .sk-btn.primary:hover { background:#6D28D9; }
+        .sk-btn.secondary { background:var(--bg-primary); color:var(--text-secondary); border:1px solid var(--border-color); }
         
-        .graph-placeholder {
-            background: var(--bg-primary);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        @media (max-width: 1024px) {
-            .feature-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .feature-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .beta-notice {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
+        @media (max-width:1024px) { .sk-tree { grid-template-columns:1fr; } .sk-stats { grid-template-columns:repeat(2,1fr); } }
     </style>
     
     <script src="app.js"></script>
+    <script>
+        let skills = [];
+        let editingSkillId = null;
+        
+        const ORIGIN_LABELS = { ai_discovered:'AI 自主发现', human_confirmed:'人类确认', human_corrected:'人类修正' };
+        const LEVEL_LABELS = { bottom:'底层', mid:'中层', surface:'表层' };
+        
+        const AI_SUGGESTIONS = [
+            { id:'sug-1', text:'Skill #002（卖点翻译）和 #001（素材识别）在零下25度项目中同时触发了 3 次。建议合并为更高层 Skill：「高价值产品素材一站式提取 + 翻译」', action:'merge' },
+            { id:'sug-2', text:'Skill #004（竖屏构图预检）已 30 天未被触发。如果团队已调整拍摄规范，建议冻结或降级以减少干扰', action:'prune' },
+            { id:'sug-3', text:'检测到新模式：当视频时长 >15 分钟且产品出镜 <3 次时，电商素材可用度普遍偏低。是否沉淀为新 Skill？', action:'create' }
+        ];
+        
+        // ========================================
+        // 渲染
+        // ========================================
+        
+        function render() {
+            skills = getSkills();
+            renderStats();
+            renderTree();
+            renderSuggestions();
+        }
+        
+        function renderStats() {
+            const active = skills.filter(s => !s.frozen);
+            const frozen = skills.filter(s => s.frozen);
+            const totalApplied = skills.reduce((sum, s) => sum + s.appliedCount, 0);
+            const avgConf = skills.length ? Math.round(skills.reduce((sum, s) => sum + s.confidence, 0) / skills.length * 100) : 0;
+            
+            document.getElementById('statActive').textContent = active.length;
+            document.getElementById('statFrozen').textContent = frozen.length;
+            document.getElementById('statApplied').textContent = totalApplied;
+            document.getElementById('statAvgConf').textContent = avgConf + '%';
+        }
+        
+        function renderTree() {
+            const buckets = { bottom:[], mid:[], surface:[] };
+            skills.forEach(s => { (buckets[s.level] || buckets.mid).push(s); });
+            
+            document.getElementById('treeBottom').innerHTML = buckets.bottom.map(renderCard).join('');
+            document.getElementById('treeMid').innerHTML = buckets.mid.map(renderCard).join('');
+            document.getElementById('treeSurface').innerHTML = buckets.surface.map(renderCard).join('');
+        }
+        
+        function renderCard(sk) {
+            const frozenCls = sk.frozen ? ' frozen' : '';
+            const confPct = Math.round(sk.confidence * 100);
+            
+            const stepsHtml = (sk.steps || []).map(s => `<li>${s}</li>`).join('');
+            
+            const evolveHtml = (sk.evolveLog || []).map(e => {
+                return `<div><span class="sk-evolve-dot ${e.type}"></span><strong>${e.date}</strong> ${e.event}</div>`;
+            }).join('');
+            
+            return `
+            <div class="sk-card${frozenCls}" id="card-${sk.id}">
+                <div class="sk-card-top" onclick="toggleCard('${sk.id}')">
+                    <div class="sk-card-name">${sk.name}</div>
+                    <div class="sk-card-trigger">触发：${sk.trigger}</div>
+                    <div class="sk-card-mini-meta">
+                        <span>${ORIGIN_LABELS[sk.origin] || sk.origin}</span>
+                        <span>应用 ${sk.appliedCount} 次</span>
+                        <span>${confPct}% <span class="sk-conf-bar"><span class="sk-conf-fill" style="width:${confPct}%"></span></span></span>
+                        <span>来源: ${sk.sourceProject}</span>
+                    </div>
+                </div>
+                <div class="sk-card-detail">
+                    <div class="sk-detail-section">
+                        <div class="sk-detail-label">执行步骤</div>
+                        <ol class="sk-detail-steps">${stepsHtml}</ol>
+                    </div>
+                    <div class="sk-detail-section">
+                        <div class="sk-detail-label">预期结果</div>
+                        <div class="sk-detail-expected">${sk.expected}</div>
+                    </div>
+                    ${evolveHtml ? `
+                    <div class="sk-detail-section">
+                        <div class="sk-detail-label">进化记录</div>
+                        <div class="sk-evolve-log">${evolveHtml}</div>
+                    </div>` : ''}
+                </div>
+                <div class="sk-card-actions">
+                    <button onclick="editSkill('${sk.id}')">编辑</button>
+                    <button onclick="toggleFreeze('${sk.id}')">${sk.frozen ? '解冻' : '冻结'}</button>
+                    <button class="danger" onclick="deleteSkill('${sk.id}')">删除</button>
+                </div>
+            </div>`;
+        }
+        
+        function renderSuggestions() {
+            const container = document.getElementById('aiSuggestions');
+            container.innerHTML = AI_SUGGESTIONS.map(s => `
+                <div class="sk-suggest" id="sug-${s.id}">
+                    <div class="sk-suggest-text">${s.text}</div>
+                    <div class="sk-suggest-actions">
+                        <button onclick="adoptSuggestion('${s.id}')" style="color:#059669;border-color:#059669;">采纳</button>
+                        <button onclick="dismissSuggestion('${s.id}')">忽略</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ========================================
+        // 交互
+        // ========================================
+        
+        function toggleCard(id) {
+            const card = document.getElementById('card-' + id);
+            if (card) card.classList.toggle('expanded');
+        }
+        
+        function toggleFreeze(id) {
+            const sk = skills.find(s => s.id === id);
+            if (!sk) return;
+            sk.frozen = !sk.frozen;
+            if (sk.frozen) {
+                sk.evolveLog = sk.evolveLog || [];
+                sk.evolveLog.push({ date: new Date().toISOString().split('T')[0], event: '人工冻结：暂停应用', type: 'edited' });
+            }
+            saveSkills(skills);
+            render();
+            showToast(sk.frozen ? '已冻结，该 Skill 暂停应用' : '已解冻，该 Skill 恢复应用');
+        }
+        
+        function deleteSkill(id) {
+            if (!confirm('确定删除这条 Skill？删除后不可恢复。')) return;
+            skills = skills.filter(s => s.id !== id);
+            saveSkills(skills);
+            render();
+            showToast('已删除');
+        }
+        
+        function editSkill(id) {
+            const sk = skills.find(s => s.id === id);
+            if (!sk) return;
+            editingSkillId = id;
+            document.getElementById('skModalTitle').textContent = '编辑 Skill';
+            document.getElementById('skName').value = sk.name;
+            document.getElementById('skTrigger').value = sk.trigger;
+            document.getElementById('skSteps').value = (sk.steps || []).join('\n');
+            document.getElementById('skExpected').value = sk.expected;
+            document.getElementById('skLevel').value = sk.level;
+            document.getElementById('skModal').classList.remove('hidden');
+        }
+        
+        function closeSkModal() {
+            document.getElementById('skModal').classList.add('hidden');
+            editingSkillId = null;
+        }
+        
+        function saveSkEdit() {
+            const sk = skills.find(s => s.id === editingSkillId);
+            if (!sk) { closeSkModal(); return; }
+            
+            const oldLevel = sk.level;
+            sk.name = document.getElementById('skName').value.trim();
+            sk.trigger = document.getElementById('skTrigger').value.trim();
+            sk.steps = document.getElementById('skSteps').value.split('\n').map(s => s.trim()).filter(Boolean);
+            sk.expected = document.getElementById('skExpected').value.trim();
+            sk.level = document.getElementById('skLevel').value;
+            
+            sk.evolveLog = sk.evolveLog || [];
+            const changeNote = oldLevel !== sk.level ? `层级从${LEVEL_LABELS[oldLevel]}调整为${LEVEL_LABELS[sk.level]}` : '内容修改';
+            sk.evolveLog.push({ date: new Date().toISOString().split('T')[0], event: '人工编辑：' + changeNote, type: 'edited' });
+            sk.origin = 'human_corrected';
+            
+            saveSkills(skills);
+            closeSkModal();
+            render();
+            showToast('已保存');
+        }
+        
+        function adoptSuggestion(id) {
+            const el = document.getElementById('sug-' + id);
+            if (el) el.remove();
+            showToast('建议已采纳，后续版本将自动执行');
+        }
+        
+        function dismissSuggestion(id) {
+            const el = document.getElementById('sug-' + id);
+            if (el) el.remove();
+            showToast('已忽略');
+        }
+        
+        // ========================================
+        // 导出 / 导入
+        // ========================================
+        
+        function exportJSON() {
+            const data = { version: 1, exportedAt: new Date().toISOString(), skills: skills };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'stormrelay-skills.json';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('已导出 JSON');
+        }
+        
+        function exportPrompt() {
+            const activeSkills = skills.filter(s => !s.frozen);
+            let prompt = '# StormRelay Skill System Prompt\n';
+            prompt += '# 以下规则从项目实操中沉淀，请在处理视频内容时遵循：\n\n';
+            
+            activeSkills.forEach((sk, i) => {
+                prompt += `## Skill ${i + 1}: ${sk.name}\n`;
+                prompt += `触发条件: ${sk.trigger}\n`;
+                prompt += `执行步骤:\n`;
+                sk.steps.forEach((s, j) => { prompt += `  ${j + 1}. ${s}\n`; });
+                prompt += `预期结果: ${sk.expected}\n`;
+                prompt += `置信度: ${Math.round(sk.confidence * 100)}% | 应用次数: ${sk.appliedCount}\n\n`;
+            });
+            
+            prompt += '# 冻结的 Skill（仅供参考，不执行）:\n';
+            skills.filter(s => s.frozen).forEach(sk => {
+                prompt += `# [冻结] ${sk.name}: ${sk.trigger}\n`;
+            });
+            
+            const blob = new Blob([prompt], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'stormrelay-skills-prompt.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast('已导出为 Prompt 片段，可粘贴到飞书或 AI Agent System Prompt');
+        }
+        
+        function importSkills(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const imported = data.skills || data;
+                    if (!Array.isArray(imported)) { showToast('格式错误：需要 skills 数组'); return; }
+                    const merged = [...skills];
+                    let added = 0;
+                    imported.forEach(sk => {
+                        if (!merged.find(s => s.id === sk.id)) { merged.push(sk); added++; }
+                    });
+                    saveSkills(merged);
+                    render();
+                    showToast(`导入完成：新增 ${added} 条，跳过 ${imported.length - added} 条重复`);
+                } catch (err) {
+                    showToast('导入失败：JSON 解析错误');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+        
+        // ========================================
+        // ESC 关闭
+        // ========================================
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSkModal();
+        });
+        
+        render();
+    </script>
 </body>
 </html>

@@ -7,7 +7,13 @@
       "Bash(git push:*)",
       "Bash(git fetch:*)",
       "Bash(git reset:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(wget:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(git clone:*)",
+      "Bash(ping:*)",
+      "Bash(nslookup:*)"
     ]
   }
 }

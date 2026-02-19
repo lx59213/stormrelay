@@ -62,8 +62,8 @@
                         <span>内容分析</span>
                     </a>
                     <a href="knowledge.html" class="sidebar-item">
-                        <span class="sidebar-item-icon">🧠</span>
-                        <span>知识图谱</span>
+                        <span class="sidebar-item-icon">🧬</span>
+                        <span>Skill 工作台</span>
                         <span class="sidebar-item-count">Beta</span>
                     </a>
                 </div>
@@ -518,7 +518,7 @@
                     const data = JSON.parse(e.target.result);
                     
                     if (data.projects) {
-                        saveProjects(data.projects);
+                        saveAllProjects(data.projects);
                     }
                     if (data.prompts) {
                         localStorage.setItem('stormrelay_prompts', JSON.stringify(data.prompts));
@@ -537,7 +537,8 @@
         // 清空数据
         document.getElementById('clearDataBtn').addEventListener('click', function() {
             if (confirm('确定要清空所有项目数据吗？此操作不可恢复！')) {
-                localStorage.removeItem('stormrelay_projects');
+                localStorage.removeItem('stormrelay_projects_v2');
+                localStorage.removeItem('stormrelay_data_version');
                 updateDataStats();
                 showToast('数据已清空');
             }

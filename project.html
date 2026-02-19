@@ -704,6 +704,7 @@
                     <div class="view-toggle">
                         <button class="view-toggle-btn active" data-view="editor">剪辑视角</button>
                         <button class="view-toggle-btn" data-view="operator">运营视角</button>
+                        <button class="view-toggle-btn" data-view="ecommerce">电商视角</button>
                     </div>
                     <button class="btn btn-primary" id="deliverBtn">
                         <span>🚀</span>
@@ -779,6 +780,7 @@
                             <button class="right-tab active" data-panel="transcript">字幕</button>
                             <button class="right-tab" data-panel="notes">笔记</button>
                             <button class="right-tab" data-panel="summary">AI总结</button>
+                            <button class="right-tab" data-panel="shootingAdvice">拍摄建议</button>
                         </div>
                     </div>
                     
@@ -808,6 +810,13 @@
                         <!-- AI总结面板 -->
                         <div class="right-panel-section" id="summaryPanel">
                             <div id="summaryContent">
+                                <!-- 动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 拍摄建议面板 -->
+                        <div class="right-panel-section" id="shootingAdvicePanel">
+                            <div id="shootingAdviceContent">
                                 <!-- 动态生成 -->
                             </div>
                         </div>
@@ -880,6 +889,8 @@
                 return;
             }
             
+            if (!projectData.corePosition) projectData.corePosition = { content: '', status: 'ai' };
+            
             // 渲染页面
             renderProjectHeader();
             renderVideo();
@@ -887,6 +898,7 @@
             renderTranscript();
             renderNotes();
             renderSummary();
+            renderShootingAdvice();
             renderTimelineMarkers();
             updateProgress();
             updateUIByStatus();
@@ -1008,12 +1020,15 @@
                 return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无卖点数据</p>';
             }
             
-            return projectData.sellingPoints.map(point => `
+            return projectData.sellingPoints.map(point => {
+                const src = point.source && SOURCE_CONFIG[point.source] ? SOURCE_CONFIG[point.source] : null;
+                const sourceTag = src ? `<span class="ecommerce-source-tag" style="background:${src.bg};color:${src.color};font-size:10px;margin-left:6px;">${src.label}</span>` : '';
+                return `
                 <div class="annotation-item ${point.status}" data-id="${point.id}" data-type="point">
                     <input type="checkbox" class="annotation-checkbox point-cb" 
                            data-id="${point.id}" ${point.status === 'confirmed' ? 'checked' : ''}>
                     <div class="annotation-content">
-                        <div class="annotation-text">${point.content}</div>
+                        <div class="annotation-text">${point.content}${sourceTag}</div>
                         <div class="annotation-meta">
                             ${getStatusTagHTML(point.status)}
                         </div>
@@ -1022,8 +1037,8 @@
                         <button class="action-btn" onclick="editPoint(${point.id})">✏️ 编辑</button>
                         <button class="action-btn delete" onclick="deletePoint(${point.id})">🗑️ 删除</button>
                     </div>
-                </div>
-            `).join('') + `
+                </div>`;
+            }).join('') + `
                 <button class="add-item-btn" onclick="addPoint()">+ 添加卖点</button>
             `;
         }
@@ -1120,10 +1135,11 @@
                 return;
             }
             
+            const noteIcons = { '剪辑师': '✂️', '运营': '📢', '电商运营': '🛒', 'AI 助手': '🤖' };
             container.innerHTML = projectData.notes.map(note => `
                 <div class="note-item">
                     <div class="note-header">
-                        <span class="note-author">${note.author === '剪辑师' ? '✂️' : '📢'} ${note.author}</span>
+                        <span class="note-author">${noteIcons[note.author] || '📝'} ${note.author}</span>
                         <span class="note-time">${note.time}</span>
                     </div>
                     <div class="note-content">${note.content}</div>
@@ -1172,21 +1188,261 @@
             }
         }
         
+        // ========================================
+        // 电商视角渲染（可交互版）
+        // ========================================
+        
+        const SOURCE_CONFIG = {
+            self:       { label: '自有品牌', color: '#059669', bg: '#ECFDF5' },
+            partner:    { label: '合作方',   color: '#2563EB', bg: '#EFF6FF' },
+            tech:       { label: '自研技术', color: '#7C3AED', bg: '#F5F3FF' },
+            thirdparty: { label: '友商',     color: '#6B7280', bg: '#F3F4F6' }
+        };
+        
+        let nextEcommerceId = 100;
+        
+        function renderEcommerceAssets() {
+            const container = document.getElementById('annotationContent');
+            const assets = projectData.ecommerceAssets;
+            
+            if (!assets || assets.length === 0) {
+                container.innerHTML = `
+                    <div class="ecommerce-empty">
+                        <h3>📦 暂无电商素材</h3>
+                        <p>AI 未在此视频中发现产品出镜片段</p>
+                    </div>
+                    <button class="add-item-btn" onclick="addEcommerceAsset()">+ 添加电商素材</button>`;
+                return;
+            }
+            
+            const cardsHtml = assets.map(asset => {
+                const stars = '★'.repeat(asset.usability) + '☆'.repeat(5 - asset.usability);
+                const src = SOURCE_CONFIG[asset.source] || SOURCE_CONFIG.thirdparty;
+                const statusTag = asset.status === 'confirmed' ? '✅ 已确认' : asset.status === 'edited' ? '✏️ 已编辑' : '🤖 AI识别';
+                
+                const translationRows = (asset.translations || []).map(t => `
+                    <tr>
+                        <td class="tech-col">${t.technical}</td>
+                        <td class="arrow-col">→</td>
+                        <td class="consumer-col">${t.consumer}</td>
+                    </tr>`).join('');
+                
+                const tagsHtml = (asset.tags || []).map(tag => 
+                    `<span class="ecommerce-tag">${tag}</span>`).join('');
+                
+                return `
+                <div class="ecommerce-card" data-id="${asset.id}" data-start="${asset.startSeconds}" data-end="${asset.endSeconds}">
+                    <div class="ecommerce-card-header">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" class="annotation-checkbox ecommerce-cb" 
+                                   data-id="${asset.id}" ${asset.status === 'confirmed' ? 'checked' : ''}>
+                            <span class="ecommerce-card-product">📦 ${asset.product}</span>
+                            <span class="ecommerce-source-tag" style="background:${src.bg};color:${src.color};">${src.label}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="ecommerce-card-time">${asset.timeStart}-${asset.timeEnd}</span>
+                            <span class="ecommerce-status-tag">${statusTag}</span>
+                        </div>
+                    </div>
+                    <div class="ecommerce-card-body">
+                        <div class="ecommerce-card-desc">${asset.description}</div>
+                        <div class="ecommerce-tags">${tagsHtml}</div>
+                        ${translationRows ? `
+                        <table class="translation-table">
+                            <thead><tr><th>技术语言</th><th></th><th>消费者语言</th></tr></thead>
+                            <tbody>${translationRows}</tbody>
+                        </table>` : ''}
+                    </div>
+                    <div class="ecommerce-card-footer">
+                        <span>电商适用度: <span class="ecommerce-stars">${stars}</span></span>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="confidence-badge">AI ${Math.round(asset.confidence * 100)}%</span>
+                            <button class="action-btn" onclick="editEcommerceAsset('${asset.id}')">✏️</button>
+                            <button class="action-btn delete" onclick="deleteEcommerceAsset('${asset.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="rule-hint hidden" id="hint-${asset.id}">操作已沉淀为 Skill → <a href="knowledge.html" style="color:#7C3AED;">Skill 工作台</a></div>
+                </div>`;
+            }).join('');
+            
+            container.innerHTML = `
+                <div style="padding: 0 0 12px; font-size: 13px; color: var(--text-secondary);">
+                    已发现 <strong style="color: #065F46;">${assets.length}</strong> 个产品出镜片段
+                </div>
+                ${cardsHtml}
+                <button class="add-item-btn" onclick="addEcommerceAsset()">+ 添加电商素材</button>`;
+            
+            rebindEcommerceCheckboxes();
+        }
+        
+        function rebindEcommerceCheckboxes() {
+            document.querySelectorAll('.ecommerce-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id = this.dataset.id;
+                    const wasChecked = this.checked;
+                    const asset = projectData.ecommerceAssets.find(a => a.id === id);
+                    if (!asset) return;
+                    asset.status = wasChecked ? 'confirmed' : 'ai';
+                    saveProjectData();
+                    renderEcommerceAssets();
+                    updateProgress();
+                    if (wasChecked) {
+                        const hint = document.getElementById('hint-' + id);
+                        if (hint) { hint.classList.remove('hidden'); setTimeout(() => hint.classList.add('hidden'), 4000); }
+                    }
+                });
+            });
+        }
+        
+        function editEcommerceAsset(id) {
+            const asset = projectData.ecommerceAssets.find(a => a.id === id);
+            if (!asset) return;
+            editingItem = { type: 'ecommerceAsset', id };
+            document.getElementById('modalTitle').textContent = '编辑电商素材';
+            document.getElementById('modalLabel').textContent = '产品名称 + 描述';
+            document.getElementById('modalInput').value = asset.product + '\n---\n' + asset.description;
+            document.getElementById('modalExtraGroup').style.display = 'block';
+            document.getElementById('modalExtraLabel').textContent = '标签（逗号分隔）';
+            document.getElementById('modalExtraInput').value = (asset.tags || []).join(', ');
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function deleteEcommerceAsset(id) {
+            if (!confirm('确定删除这条电商素材吗？')) return;
+            projectData.ecommerceAssets = projectData.ecommerceAssets.filter(a => a.id !== id);
+            saveProjectData();
+            renderEcommerceAssets();
+            updateProgress();
+            showToast('已删除');
+        }
+        
+        function addEcommerceAsset() {
+            editingItem = { type: 'newEcommerceAsset' };
+            document.getElementById('modalTitle').textContent = '添加电商素材';
+            document.getElementById('modalLabel').textContent = '产品名称 + 描述（用---分隔）';
+            document.getElementById('modalInput').value = '';
+            document.getElementById('modalExtraGroup').style.display = 'block';
+            document.getElementById('modalExtraLabel').textContent = '时间段（如 04:05-04:22）';
+            document.getElementById('modalExtraInput').value = '';
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+        
+        function renderEcommerceTimeline() {
+            const container = document.getElementById('timelineBar');
+            const assets = projectData.ecommerceAssets;
+            
+            if (!assets || assets.length === 0 || !projectData.duration) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            const durationParts = projectData.duration.split(':');
+            const totalSeconds = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
+            
+            container.innerHTML = assets.map(asset => {
+                const startPct = (asset.startSeconds / totalSeconds) * 100;
+                const widthPct = ((asset.endSeconds - asset.startSeconds) / totalSeconds) * 100;
+                return `
+                    <div class="timeline-marker marker-ecommerce" 
+                         style="left: ${startPct}%; width: ${Math.max(widthPct, 0.5)}%;" 
+                         data-seconds="${asset.startSeconds}"
+                         title="${asset.product} (${asset.timeStart}-${asset.timeEnd})">
+                    </div>`;
+            }).join('');
+        }
+        
+        function renderShootingAdvice() {
+            const container = document.getElementById('shootingAdviceContent');
+            const advice = projectData.shootingAdvice;
+            
+            if (!advice) {
+                container.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: 40px;">暂无拍摄建议</p>';
+                return;
+            }
+            
+            const summaryHtml = advice.summary ? `
+                <div class="advice-summary">
+                    <div class="advice-summary-title">📊 本期电商素材评估</div>
+                    <div class="advice-summary-stats">
+                        发现 <strong>${advice.summary.assetCount}</strong> 个产品出镜片段，
+                        总时长约 <strong>${advice.summary.totalDuration}</strong><br>
+                        电商可用度: <strong>${advice.summary.usabilityRating}</strong>
+                        ${advice.summary.usabilityNote ? `（${advice.summary.usabilityNote}）` : ''}
+                    </div>
+                </div>` : '';
+            
+            const suggestionsHtml = (advice.suggestions || []).map((s, i) => `
+                <div class="advice-item" data-seconds="${s.seconds || 0}">
+                    <div class="advice-item-header">
+                        <input type="checkbox" class="annotation-checkbox advice-cb" 
+                               data-id="${s.id || i}" ${s.status === 'adopted' ? 'checked' : ''}>
+                        <div class="advice-item-title">${i + 1}. ${s.title}</div>
+                        ${s.timeRef ? `<span class="advice-item-time" data-seconds="${s.seconds || 0}">${s.timeRef}</span>` : ''}
+                    </div>
+                    <div class="advice-item-detail">${s.detail}</div>
+                    ${s.status === 'adopted' ? '<div class="advice-adopted-tag">已采纳</div>' : ''}
+                </div>`).join('');
+            
+            const valueHtml = advice.estimatedValue ? `
+                <div class="advice-value">
+                    <div class="advice-value-title">📈 预估电商价值（优化拍摄策略后）</div>
+                    <div class="advice-value-list">
+                        ${advice.estimatedValue.detailPageImages ? `• 详情页场景图: ${advice.estimatedValue.detailPageImages}<br>` : ''}
+                        ${advice.estimatedValue.shortVideoClips ? `• 短视频切片: ${advice.estimatedValue.shortVideoClips}<br>` : ''}
+                        ${advice.estimatedValue.xiaohongshuMaterial ? `• 小红书素材: ${advice.estimatedValue.xiaohongshuMaterial}` : ''}
+                    </div>
+                </div>` : '';
+            
+            container.innerHTML = `
+                <div class="shooting-advice-section">
+                    ${summaryHtml}
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">💡 下次拍摄建议</div>
+                    ${suggestionsHtml}
+                    ${valueHtml}
+                </div>`;
+            
+            rebindAdviceCheckboxes();
+        }
+        
+        function rebindAdviceCheckboxes() {
+            document.querySelectorAll('.advice-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const id = this.dataset.id;
+                    const suggestions = projectData.shootingAdvice?.suggestions || [];
+                    const s = suggestions.find(s => (s.id || '') === id) || suggestions[parseInt(id)];
+                    if (s) {
+                        s.status = this.checked ? 'adopted' : 'pending';
+                        saveProjectData();
+                        renderShootingAdvice();
+                        updateProgress();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.advice-item-time').forEach(el => {
+                el.style.cursor = 'pointer';
+                el.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const seconds = parseInt(this.dataset.seconds);
+                    if (!isNaN(seconds)) {
+                        const player = document.getElementById('mediaPlayer');
+                        if (player) { player.currentTime = seconds; player.play(); }
+                    }
+                });
+            });
+        }
+        
         function renderTimelineMarkers() {
             const container = document.getElementById('timelineBar');
             
-            // 防护检查：确保有时长数据
-            if (!projectData.duration) {
-                projectData.duration = '10:00'; // 默认10分钟
-            }
+            const durationStr = projectData.duration || '10:00';
             
             if (!projectData.timestamps || projectData.timestamps.length === 0) {
                 container.innerHTML = '';
                 return;
             }
             
-            // 解析时长
-            const durationParts = projectData.duration.split(':');
+            const durationParts = durationStr.split(':');
             const totalSeconds = parseInt(durationParts[0]) * 60 + parseInt(durationParts[1]);
             
             let markersHtml = '';
@@ -1249,12 +1505,13 @@
             const viewText = document.getElementById('viewText');
             const annotationContent = document.getElementById('annotationContent');
             const notDeliveredNotice = document.getElementById('notDeliveredNotice');
+            const bottomLeft = document.querySelector('.bottom-bar-left');
             
             document.querySelectorAll('.view-toggle-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.view === view);
             });
             
-            layout.classList.toggle('operator-view', view === 'operator');
+            layout.classList.remove('operator-view', 'ecommerce-view');
             viewDot.className = `view-indicator-dot ${view}`;
             
             if (view === 'editor') {
@@ -1263,17 +1520,38 @@
                     '剪辑视角 · 只读模式';
                 annotationContent.classList.remove('hidden');
                 notDeliveredNotice.classList.add('hidden');
-            } else {
+                renderAnnotations();
+                renderTimelineMarkers();
+                updateProgress();
+            } else if (view === 'operator') {
+                layout.classList.add('operator-view');
                 viewText.textContent = '运营视角 · 查看剪辑师确认的信息';
                 
-                // 运营视角：未交付时显示提示
                 if (projectData.status === 'pending') {
                     annotationContent.classList.add('hidden');
                     notDeliveredNotice.classList.remove('hidden');
                 } else {
                     annotationContent.classList.remove('hidden');
                     notDeliveredNotice.classList.add('hidden');
+                    renderAnnotations();
                 }
+                renderTimelineMarkers();
+            } else if (view === 'ecommerce') {
+                layout.classList.add('ecommerce-view');
+                viewText.textContent = '电商视角 · 产品出镜片段 + 卖点翻译 + 拍摄建议';
+                notDeliveredNotice.classList.add('hidden');
+                annotationContent.classList.remove('hidden');
+                renderEcommerceAssets();
+                renderEcommerceTimeline();
+                renderShootingAdvice();
+                updateProgress();
+                
+                document.querySelectorAll('.right-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.right-panel-section').forEach(s => s.classList.remove('active'));
+                const adviceTab = document.querySelector('.right-tab[data-panel="shootingAdvice"]');
+                if (adviceTab) adviceTab.classList.add('active');
+                const advicePanel = document.getElementById('shootingAdvicePanel');
+                if (advicePanel) advicePanel.classList.add('active');
             }
         }
         
@@ -1285,22 +1563,31 @@
             let confirmed = 0;
             let edited = 0;
             
-            if (projectData.corePosition.status === 'confirmed') confirmed++;
-            if (projectData.corePosition.status === 'edited') edited++;
-            
-            if (projectData.sellingPoints) {
-                confirmed += projectData.sellingPoints.filter(p => p.status === 'confirmed').length;
-                edited += projectData.sellingPoints.filter(p => p.status === 'edited').length;
-            }
-            
-            if (projectData.timestamps) {
-                confirmed += projectData.timestamps.filter(t => t.status === 'confirmed').length;
-                edited += projectData.timestamps.filter(t => t.status === 'edited').length;
-            }
-            
-            if (projectData.cautions) {
-                confirmed += projectData.cautions.filter(c => c.status === 'confirmed').length;
-                edited += projectData.cautions.filter(c => c.status === 'edited').length;
+            if (currentView === 'ecommerce') {
+                if (projectData.ecommerceAssets) {
+                    confirmed += projectData.ecommerceAssets.filter(a => a.status === 'confirmed').length;
+                    edited += projectData.ecommerceAssets.filter(a => a.status === 'edited').length;
+                }
+                const suggestions = projectData.shootingAdvice?.suggestions || [];
+                confirmed += suggestions.filter(s => s.status === 'adopted').length;
+            } else {
+                if (projectData.corePosition.status === 'confirmed') confirmed++;
+                if (projectData.corePosition.status === 'edited') edited++;
+                
+                if (projectData.sellingPoints) {
+                    confirmed += projectData.sellingPoints.filter(p => p.status === 'confirmed').length;
+                    edited += projectData.sellingPoints.filter(p => p.status === 'edited').length;
+                }
+                
+                if (projectData.timestamps) {
+                    confirmed += projectData.timestamps.filter(t => t.status === 'confirmed').length;
+                    edited += projectData.timestamps.filter(t => t.status === 'edited').length;
+                }
+                
+                if (projectData.cautions) {
+                    confirmed += projectData.cautions.filter(c => c.status === 'confirmed').length;
+                    edited += projectData.cautions.filter(c => c.status === 'edited').length;
+                }
             }
             
             document.getElementById('confirmProgress').textContent = confirmed;
@@ -1322,6 +1609,7 @@
         
         function editPoint(id) {
             const point = projectData.sellingPoints.find(p => p.id === id);
+            if (!point) return;
             editingItem = { type: 'point', id };
             document.getElementById('modalTitle').textContent = '编辑卖点';
             document.getElementById('modalLabel').textContent = '卖点内容';
@@ -1332,6 +1620,7 @@
         
         function editTimestamp(id) {
             const ts = projectData.timestamps.find(t => t.id === id);
+            if (!ts) return;
             editingItem = { type: 'timestamp', id };
             document.getElementById('modalTitle').textContent = '编辑时间点';
             document.getElementById('modalLabel').textContent = '时间点描述';
@@ -1344,6 +1633,7 @@
         
         function editCaution(id) {
             const c = projectData.cautions.find(c => c.id === id);
+            if (!c) return;
             editingItem = { type: 'caution', id };
             document.getElementById('modalTitle').textContent = '编辑注意事项';
             document.getElementById('modalLabel').textContent = '风险描述';
@@ -1517,6 +1807,7 @@
             
             // 模态框保存
             document.getElementById('modalSaveBtn').addEventListener('click', function() {
+                if (!editingItem) { closeModal(); return; }
                 const content = document.getElementById('modalInput').value.trim();
                 if (!content) {
                     showToast('内容不能为空');
@@ -1532,12 +1823,14 @@
                     renderAnnotations();
                 } else if (editingItem.type === 'point') {
                     const point = projectData.sellingPoints.find(p => p.id === editingItem.id);
+                    if (!point) { closeModal(); return; }
                     point.content = content;
                     point.status = 'edited';
                     saveProjectData();
                     document.getElementById('sellingPointsBody').innerHTML = renderSellingPoints();
                 } else if (editingItem.type === 'timestamp') {
                     const ts = projectData.timestamps.find(t => t.id === editingItem.id);
+                    if (!ts) { closeModal(); return; }
                     ts.description = content;
                     ts.usage = extra || ts.usage;
                     ts.status = 'edited';
@@ -1546,6 +1839,7 @@
                     renderTimelineMarkers();
                 } else if (editingItem.type === 'caution') {
                     const c = projectData.cautions.find(c => c.id === editingItem.id);
+                    if (!c) { closeModal(); return; }
                     c.content = content;
                     c.action = extra || c.action;
                     c.status = 'edited';
@@ -1587,6 +1881,43 @@
                     });
                     saveProjectData();
                     document.getElementById('cautionsBody').innerHTML = renderCautions();
+                } else if (editingItem.type === 'ecommerceAsset') {
+                    const asset = projectData.ecommerceAssets.find(a => a.id === editingItem.id);
+                    if (asset) {
+                        const parts = content.split('---');
+                        asset.product = (parts[0] || '').trim();
+                        asset.description = (parts[1] || parts[0] || '').trim();
+                        if (extra) asset.tags = extra.split(',').map(t => t.trim()).filter(Boolean);
+                        asset.status = 'edited';
+                        saveProjectData();
+                        renderEcommerceAssets();
+                    }
+                } else if (editingItem.type === 'newEcommerceAsset') {
+                    if (!projectData.ecommerceAssets) projectData.ecommerceAssets = [];
+                    const parts = content.split('---');
+                    const timeParts = (extra || '00:00-00:10').split('-');
+                    const startTime = timeParts[0] || '00:00';
+                    const endTime = timeParts[1] || '00:10';
+                    projectData.ecommerceAssets.push({
+                        id: 'ea-new-' + (nextEcommerceId++),
+                        product: (parts[0] || '').trim(),
+                        timeStart: startTime,
+                        timeEnd: endTime,
+                        startSeconds: parseTimeToSeconds(startTime),
+                        endSeconds: parseTimeToSeconds(endTime),
+                        description: (parts[1] || parts[0] || '').trim(),
+                        thumbnail: null,
+                        tags: [],
+                        source: 'self',
+                        sourceNote: '手动添加',
+                        translations: [],
+                        usability: 3,
+                        confidence: 1.0,
+                        status: 'edited'
+                    });
+                    saveProjectData();
+                    renderEcommerceAssets();
+                    renderEcommerceTimeline();
                 }
                 
                 closeModal();
@@ -1595,38 +1926,37 @@
                 showToast('保存成功');
             });
             
-            // 时间点点击跳转
+            // 时间点点击跳转（统一 null 安全）
+            function seekToTime(seconds) {
+                const player = document.getElementById('mediaPlayer');
+                if (!player) return;
+                player.currentTime = seconds;
+                player.play();
+            }
+            
             document.addEventListener('click', function(e) {
                 const timestampItem = e.target.closest('.timestamp-item');
                 if (timestampItem && !e.target.closest('.annotation-actions') && !e.target.closest('.annotation-checkbox')) {
-                    const seconds = parseInt(timestampItem.dataset.seconds);
-                    const player = document.getElementById('mediaPlayer');
-                    if (player) {
-                        player.currentTime = seconds;
-                        player.play();
-                    }
+                    seekToTime(parseInt(timestampItem.dataset.seconds));
                 }
                 
                 const transcriptLine = e.target.closest('.transcript-line');
                 if (transcriptLine) {
-                    const seconds = parseInt(transcriptLine.dataset.seconds);
-                    const player = document.getElementById('mediaPlayer');
-                    if (player) {
-                        player.currentTime = seconds;
-                        player.play();
-                    }
+                    seekToTime(parseInt(transcriptLine.dataset.seconds));
                     document.querySelectorAll('.transcript-line').forEach(l => l.classList.remove('active'));
                     transcriptLine.classList.add('active');
                 }
                 
                 const timelineMarker = e.target.closest('.timeline-marker');
                 if (timelineMarker) {
-                    const seconds = parseInt(timelineMarker.dataset.seconds);
-                    const player = document.getElementById('mediaPlayer');
-                    if (player) {
-                        player.currentTime = seconds;
-                        player.play();
-                    }
+                    seekToTime(parseInt(timelineMarker.dataset.seconds));
+                }
+                
+                const ecommerceCard = e.target.closest('.ecommerce-card');
+                if (ecommerceCard && ecommerceCard.dataset.start && !e.target.closest('.action-btn') && !e.target.closest('.annotation-checkbox')) {
+                    document.querySelectorAll('.ecommerce-card').forEach(c => c.classList.remove('active'));
+                    ecommerceCard.classList.add('active');
+                    seekToTime(parseInt(ecommerceCard.dataset.start));
                 }
             });
             
@@ -1661,6 +1991,83 @@
             
             // 归档按钮
             document.getElementById('archiveBtn').addEventListener('click', archiveProject);
+            
+            // 导出清单（根据视角切换导出内容）
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                if (!projectData) return;
+                
+                if (currentView === 'ecommerce') {
+                    const lines = [`# ${projectData.title} — 电商素材清单\n`];
+                    lines.push(`**导出时间：** ${new Date().toLocaleDateString()}\n`);
+                    
+                    if (projectData.ecommerceAssets && projectData.ecommerceAssets.length) {
+                        lines.push('## 产品出镜素材\n');
+                        projectData.ecommerceAssets.forEach((a, i) => {
+                            const src = SOURCE_CONFIG[a.source] || {};
+                            lines.push(`### ${i + 1}. ${a.product}（${src.label || '未知'}）`);
+                            lines.push(`- 时间段: ${a.timeStart}-${a.timeEnd}`);
+                            lines.push(`- 描述: ${a.description}`);
+                            lines.push(`- 适用度: ${'★'.repeat(a.usability)}${'☆'.repeat(5 - a.usability)}`);
+                            lines.push(`- 状态: ${a.status}`);
+                            if (a.tags?.length) lines.push(`- 标签: ${a.tags.join(', ')}`);
+                            if (a.translations?.length) {
+                                lines.push(`- 卖点翻译:`);
+                                a.translations.forEach(t => lines.push(`  - ${t.technical} → ${t.consumer}`));
+                            }
+                            lines.push('');
+                        });
+                    }
+                    
+                    const suggestions = projectData.shootingAdvice?.suggestions || [];
+                    const adopted = suggestions.filter(s => s.status === 'adopted');
+                    if (adopted.length) {
+                        lines.push('## 已采纳的拍摄建议\n');
+                        adopted.forEach((s, i) => lines.push(`${i + 1}. **${s.title}** (${s.timeRef || ''}) — ${s.detail}`));
+                    }
+                    
+                    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${projectData.title}-电商素材清单.md`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('电商清单已导出');
+                } else {
+                    const lines = [`# ${projectData.title} — 标注清单\n`];
+                    lines.push(`**状态：** ${projectData.status}`);
+                    lines.push(`**时长：** ${projectData.duration}\n`);
+                    
+                    lines.push(`## 核心定位\n${projectData.corePosition.content}\n`);
+                    
+                    if (projectData.sellingPoints && projectData.sellingPoints.length) {
+                        lines.push('## 核心卖点');
+                        projectData.sellingPoints.forEach((p, i) => {
+                            const src = p.source ? `[${(SOURCE_CONFIG[p.source] || {}).label || p.source}]` : '';
+                            lines.push(`${i + 1}. ${p.content} ${src}`);
+                        });
+                        lines.push('');
+                    }
+                    if (projectData.timestamps && projectData.timestamps.length) {
+                        lines.push('## 关键时间点');
+                        projectData.timestamps.forEach(t => lines.push(`- **${t.time}** ${t.description}（${t.usage}）`));
+                        lines.push('');
+                    }
+                    if (projectData.cautions && projectData.cautions.length) {
+                        lines.push('## 注意事项');
+                        projectData.cautions.forEach(c => lines.push(`- [${c.level}] ${c.content} → ${c.action}`));
+                    }
+                    
+                    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${projectData.title}-标注清单.md`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('清单已导出');
+                }
+            });
             
             // ESC关闭模态框
             document.addEventListener('keydown', function(e) {
