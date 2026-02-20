@@ -17,7 +17,7 @@ const CONFIG = {
 // ========================================
 const PROJECTS_KEY = 'stormrelay_projects_v2';
 const DATA_VERSION_KEY = 'stormrelay_data_version';
-const CURRENT_DATA_VERSION = 4;
+const CURRENT_DATA_VERSION = 5;
 
 // 获取所有项目
 function getAllProjects() {
@@ -91,7 +91,7 @@ function initAllProjectsData() {
             deliveredAt: "2026-02-09",
             archivedAt: null,
             isReal: true,
-            videoSrc: "./零下25度，我和百万设备谁先挂…… - 1.零下25度，我和百万设备谁先挂……(Av116062414708048,P1).mp4",
+            videoSrc: "https://stormrelay-1335848641.cos.ap-guangzhou.myqcloud.com/零下25度，我和百万设备谁先挂…… - 1.零下25度，我和百万设备谁先挂……(Av116062414708048,P1).mp4",
             
             corePosition: {
                 content: "影视飓风雪地生存100小时直播的幕后技术拆解，展示极寒环境下的设备选型、信号传输方案和制片流程。",
