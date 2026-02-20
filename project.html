@@ -602,6 +602,20 @@
             pointer-events: none;
         }
         
+        /* 电商视角是平行管线，不受交付状态约束 */
+        .ecommerce-view .annotation-checkbox,
+        .readonly-mode .ecommerce-view .annotation-checkbox,
+        .readonly-mode .advice-cb {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+        }
+        .ecommerce-view .annotation-actions {
+            display: flex !important;
+        }
+        .ecommerce-view .add-item-btn {
+            display: inline-flex !important;
+        }
+        
         /* 未交付时运营视角显示的提示 */
         .not-delivered-notice {
             padding: 40px;
@@ -686,7 +700,7 @@
                     <div class="sidebar-section-title">数据沉淀</div>
                     <a href="analytics.html" class="sidebar-item">
                         <span class="sidebar-item-icon">📊</span>
-                        <span>内容分析</span>
+                        <span>效率看板</span>
                     </a>
                     <a href="knowledge.html" class="sidebar-item">
                         <span class="sidebar-item-icon">🧬</span>
@@ -718,6 +732,7 @@
                     <div class="view-toggle">
                         <button class="view-toggle-btn active" data-view="editor">剪辑视角</button>
                         <button class="view-toggle-btn" data-view="operator">运营视角</button>
+                        <span class="view-toggle-divider"></span>
                         <button class="view-toggle-btn" data-view="ecommerce">电商视角</button>
                     </div>
                     <button class="btn btn-primary" id="deliverBtn">
@@ -1485,22 +1500,26 @@
             const withdrawBtn = document.getElementById('withdrawBtn');
             const archiveBtn = document.getElementById('archiveBtn');
             
-            // 清除所有状态类
             layout.classList.remove('readonly-mode', 'operator-view');
             
+            // 电商视角是平行管线，不受交付链状态约束
+            if (currentView === 'ecommerce') {
+                deliverBtn.classList.add('hidden');
+                withdrawBtn.classList.add('hidden');
+                archiveBtn.classList.add('hidden');
+                return;
+            }
+            
             if (projectData.status === 'pending') {
-                // 待剪辑确认：剪辑可编辑，运营看不到
                 deliverBtn.classList.remove('hidden');
                 withdrawBtn.classList.add('hidden');
                 archiveBtn.classList.add('hidden');
             } else if (projectData.status === 'delivered') {
-                // 已交付运营：剪辑只读+可撤回，运营可查看+可归档
                 deliverBtn.classList.add('hidden');
                 withdrawBtn.classList.remove('hidden');
                 archiveBtn.classList.remove('hidden');
                 layout.classList.add('readonly-mode');
             } else if (projectData.status === 'archived') {
-                // 已归档：都只读，可撤回
                 deliverBtn.classList.add('hidden');
                 withdrawBtn.classList.remove('hidden');
                 archiveBtn.classList.add('hidden');
@@ -1567,6 +1586,8 @@
                 const advicePanel = document.getElementById('shootingAdvicePanel');
                 if (advicePanel) advicePanel.classList.add('active');
             }
+            
+            updateUIByStatus();
         }
         
         // ========================================

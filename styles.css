@@ -695,6 +695,14 @@ a {
     font-weight: 600;
 }
 
+.view-toggle-divider {
+    width: 1px;
+    height: 16px;
+    background: rgba(0,0,0,0.12);
+    margin: auto 2px;
+    flex-shrink: 0;
+}
+
 /* ======================================== 
    表单
    ======================================== */

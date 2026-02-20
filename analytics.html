@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飓风接力 · 内容分析</title>
+    <title>飓风接力 · 效率看板</title>
     <link rel="stylesheet" href="styles.css">
     <style>
         /* ========================================
-           分析页专用样式
+           效率看板专用样式
            ======================================== */
         
         .filter-bar {
@@ -39,19 +39,6 @@
         }
         
         .filter-select:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-        
-        .filter-input {
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            width: 140px;
-        }
-        
-        .filter-input:focus {
             outline: none;
             border-color: var(--accent-color);
         }
@@ -97,7 +84,59 @@
             padding: 20px;
         }
         
-        /* 状态条 */
+        /* ========================================
+           采纳率环形图
+           ======================================== */
+        
+        .adoption-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .adoption-item {
+            text-align: center;
+        }
+        
+        .adoption-ring {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 8px;
+            position: relative;
+        }
+        
+        .adoption-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .adoption-ring-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            font-weight: 700;
+        }
+        
+        .adoption-ring-label.good { color: #10B981; }
+        .adoption-ring-label.warn { color: #F59E0B; }
+        .adoption-ring-label.low { color: #EF4444; }
+        
+        .adoption-name {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 2px;
+        }
+        
+        .adoption-detail {
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+        
+        /* ========================================
+           状态条
+           ======================================== */
+        
         .status-bar {
             margin-bottom: 12px;
         }
@@ -140,7 +179,10 @@
         .status-bar-fill.delivered { background: var(--success-color); }
         .status-bar-fill.archived { background: #6B7280; }
         
-        /* 关键词云 */
+        /* ========================================
+           关键词云
+           ======================================== */
+        
         .keyword-cloud {
             display: flex;
             flex-wrap: wrap;
@@ -160,204 +202,104 @@
         }
         
         .keyword-tag.size-lg {
-            font-size: 16px;
+            background: rgba(99, 102, 241, 0.15);
+            color: #4F46E5;
             font-weight: 600;
-            background: var(--accent-color);
-            color: white;
+            font-size: 15px;
         }
         
         .keyword-tag.size-md {
-            font-size: 14px;
-            background: rgba(94, 106, 210, 0.2);
-            color: var(--accent-color);
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366F1;
+            font-weight: 500;
         }
         
         .keyword-tag.size-sm {
-            font-size: 12px;
-            background: var(--bg-primary);
-            color: var(--text-secondary);
+            background: rgba(99, 102, 241, 0.06);
+            color: #818CF8;
         }
         
-        /* 风险列表 */
-        .risk-list {
-            max-height: 300px;
-            overflow-y: auto;
+        /* ========================================
+           电商素材统计
+           ======================================== */
+        
+        .ecommerce-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
         }
+        
+        .eco-stat {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+        
+        .eco-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #10B981;
+        }
+        
+        .eco-stat-label {
+            font-size: 12px;
+            color: var(--text-tertiary);
+            margin-top: 4px;
+        }
+        
+        /* ========================================
+           风险列表
+           ======================================== */
         
         .risk-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             padding: 12px 16px;
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: background 0.15s;
         }
         
-        .risk-item:last-child {
-            border-bottom: none;
-        }
-        
         .risk-item:hover {
             background: var(--bg-primary);
         }
         
+        .risk-item:last-child {
+            border-bottom: none;
+        }
+        
         .risk-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            flex: 1;
         }
         
         .risk-type {
-            font-size: 13px;
-            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
         }
         
         .risk-project {
-            font-size: 11px;
+            font-size: 12px;
             color: var(--text-tertiary);
+            display: block;
+            margin-top: 2px;
         }
         
         .risk-count {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 18px;
+            font-weight: 700;
             color: var(--warning-color);
+            margin-right: 8px;
         }
         
         .risk-arrow {
             color: var(--text-tertiary);
-            font-size: 12px;
         }
         
-        /* 效率折线图 */
-        .efficiency-chart {
-            padding: 20px 0;
-        }
+        /* ========================================
+           项目详情列表
+           ======================================== */
         
-        .chart-container {
-            position: relative;
-            height: 200px;
-            margin-bottom: 20px;
-        }
-        
-        .chart-svg {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .chart-line {
-            fill: none;
-            stroke-width: 3;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        
-        .chart-line.before {
-            stroke: #EF4444;
-        }
-        
-        .chart-line.after {
-            stroke: #10B981;
-        }
-        
-        .chart-dot {
-            cursor: pointer;
-            transition: r 0.15s;
-        }
-        
-        .chart-dot:hover {
-            r: 8;
-        }
-        
-        .chart-legend {
-            display: flex;
-            justify-content: center;
-            gap: 32px;
-            margin-bottom: 16px;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
-        
-        .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-        
-        .legend-dot.before { background: #EF4444; }
-        .legend-dot.after { background: #10B981; }
-        
-        /* 效率数据表格 */
-        .efficiency-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .efficiency-table th,
-        .efficiency-table td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        .efficiency-table th {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            background: var(--bg-primary);
-        }
-        
-        .efficiency-table td {
-            font-size: 14px;
-        }
-        
-        .efficiency-table .saved {
-            color: var(--success-color);
-            font-weight: 600;
-        }
-        
-        .efficiency-table .time-before {
-            color: #EF4444;
-        }
-        
-        .efficiency-table .time-after {
-            color: #10B981;
-        }
-        
-        /* 效率总结 */
-        .efficiency-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-        }
-        
-        .summary-item {
-            text-align: center;
-        }
-        
-        .summary-value {
-            font-size: 32px;
-            font-weight: 700;
-        }
-        
-        .summary-value.positive { color: var(--success-color); }
-        .summary-value.negative { color: #EF4444; }
-        
-        .summary-label {
-            font-size: 12px;
-            color: var(--text-tertiary);
-            margin-top: 4px;
-        }
-        
-        /* 项目详情列表 */
         .project-detail-list {
             max-height: 400px;
             overflow-y: auto;
@@ -418,14 +360,6 @@
         .project-stat-value.risk { color: var(--warning-color); }
         .project-stat-value.point { color: var(--accent-color); }
         
-        /* 日期范围显示 */
-        .date-range-display {
-            font-size: 12px;
-            color: var(--text-tertiary);
-            margin-left: auto;
-        }
-        
-        /* 空状态 */
         .empty-analytics {
             text-align: center;
             padding: 60px 20px;
@@ -435,6 +369,15 @@
         .empty-analytics-icon {
             font-size: 48px;
             margin-bottom: 16px;
+        }
+        
+        .data-source-note {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border-radius: 4px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -488,7 +431,7 @@
                     <div class="sidebar-section-title">数据沉淀</div>
                     <a href="analytics.html" class="sidebar-item active">
                         <span class="sidebar-item-icon">📊</span>
-                        <span>内容分析</span>
+                        <span>效率看板</span>
                     </a>
                     <a href="knowledge.html" class="sidebar-item">
                         <span class="sidebar-item-icon">🧬</span>
@@ -512,10 +455,10 @@
         <main class="main-content">
             <header class="main-header">
                 <div class="main-header-left">
-                    <h1 class="page-title">内容分析</h1>
+                    <h1 class="page-title">效率看板</h1>
                 </div>
                 <div class="main-header-right">
-                    <span class="date-range-display" id="dateRangeDisplay">显示: 全部时间</span>
+                    <span style="font-size:12px;color:var(--text-tertiary);">数据来源: 项目实时汇总</span>
                 </div>
             </header>
             
@@ -537,12 +480,6 @@
                             <option value="archived">已上线归档</option>
                         </select>
                     </div>
-                    <div class="filter-group">
-                        <span class="filter-label">日期范围：</span>
-                        <input type="date" class="filter-input" id="dateFrom" value="2024-01-01">
-                        <span>至</span>
-                        <input type="date" class="filter-input" id="dateTo" value="2024-02-28">
-                    </div>
                     <button class="btn btn-primary" id="applyFilter">应用筛选</button>
                     <button class="btn btn-secondary" id="resetFilter">重置</button>
                 </div>
@@ -562,163 +499,19 @@
                         <span class="stat-label">风险预警</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="totalSaved">37.5h</span>
-                        <span class="stat-label">累计节省</span>
+                        <span class="stat-value" id="totalAssets">0</span>
+                        <span class="stat-label">电商素材</span>
                     </div>
                 </div>
                 
-                <!-- 效率交接折线图 - 全宽 -->
+                <!-- AI 标注采纳率 — OKR 核心指标 -->
                 <div class="analytics-card full-width" style="margin-bottom: 20px;">
                     <div class="analytics-card-header">
-                        <span class="analytics-card-title">📈 效率交接趋势</span>
-                        <span style="font-size: 12px; color: var(--text-tertiary);">模拟数据 · 单位：分钟/次交接</span>
+                        <span class="analytics-card-title">🎯 AI 标注采纳率（OKR 核心指标）</span>
+                        <span style="font-size:12px;color:var(--text-tertiary);">目标: 采纳率 ≥ 70%</span>
                     </div>
                     <div class="analytics-card-body">
-                        <div class="efficiency-chart">
-                            <!-- 图例 -->
-                            <div class="chart-legend">
-                                <div class="legend-item">
-                                    <span class="legend-dot before"></span>
-                                    <span>使用前（传统方式）</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-dot after"></span>
-                                    <span>使用后（StormRelay）</span>
-                                </div>
-                            </div>
-                            
-                            <!-- 折线图 -->
-                            <div class="chart-container">
-                                <svg class="chart-svg" viewBox="0 0 600 200" preserveAspectRatio="xMidYMid meet">
-                                    <!-- 网格线 -->
-                                    <line x1="50" y1="20" x2="50" y2="180" stroke="#E5E7EB" stroke-width="1"/>
-                                    <line x1="50" y1="180" x2="570" y2="180" stroke="#E5E7EB" stroke-width="1"/>
-                                    
-                                    <!-- Y轴刻度 -->
-                                    <text x="40" y="25" font-size="10" fill="#9CA3AF" text-anchor="end">40</text>
-                                    <line x1="45" y1="20" x2="570" y2="20" stroke="#F3F4F6" stroke-width="1" stroke-dasharray="4"/>
-                                    
-                                    <text x="40" y="65" font-size="10" fill="#9CA3AF" text-anchor="end">30</text>
-                                    <line x1="45" y1="60" x2="570" y2="60" stroke="#F3F4F6" stroke-width="1" stroke-dasharray="4"/>
-                                    
-                                    <text x="40" y="105" font-size="10" fill="#9CA3AF" text-anchor="end">20</text>
-                                    <line x1="45" y1="100" x2="570" y2="100" stroke="#F3F4F6" stroke-width="1" stroke-dasharray="4"/>
-                                    
-                                    <text x="40" y="145" font-size="10" fill="#9CA3AF" text-anchor="end">10</text>
-                                    <line x1="45" y1="140" x2="570" y2="140" stroke="#F3F4F6" stroke-width="1" stroke-dasharray="4"/>
-                                    
-                                    <text x="40" y="185" font-size="10" fill="#9CA3AF" text-anchor="end">0</text>
-                                    
-                                    <!-- X轴标签 -->
-                                    <text x="90" y="195" font-size="10" fill="#9CA3AF" text-anchor="middle">第1周</text>
-                                    <text x="180" y="195" font-size="10" fill="#9CA3AF" text-anchor="middle">第2周</text>
-                                    <text x="270" y="195" font-size="10" fill="#9CA3AF" text-anchor="middle">第3周</text>
-                                    <text x="360" y="195" font-size="10" fill="#9CA3AF" text-anchor="middle">第4周</text>
-                                    <text x="450" y="195" font-size="10" fill="#9CA3AF" text-anchor="middle">第5周</text>
-                                    <text x="540" y="195" font-size="10" fill="#9CA3AF" text-anchor="middle">当前</text>
-                                    
-                                    <!-- 使用前折线（红色） -->
-                                    <polyline class="chart-line before" 
-                                              points="90,40 180,50 270,55 360,55 450,60 540,55"/>
-                                    
-                                    <!-- 使用后折线（绿色） -->
-                                    <polyline class="chart-line after" 
-                                              points="90,110 180,130 270,155 360,165 450,168 540,168"/>
-                                    
-                                    <!-- 数据点 - 使用前 -->
-                                    <circle class="chart-dot" cx="90" cy="40" r="5" fill="#EF4444"/>
-                                    <circle class="chart-dot" cx="180" cy="50" r="5" fill="#EF4444"/>
-                                    <circle class="chart-dot" cx="270" cy="55" r="5" fill="#EF4444"/>
-                                    <circle class="chart-dot" cx="360" cy="55" r="5" fill="#EF4444"/>
-                                    <circle class="chart-dot" cx="450" cy="60" r="5" fill="#EF4444"/>
-                                    <circle class="chart-dot" cx="540" cy="55" r="5" fill="#EF4444"/>
-                                    
-                                    <!-- 数据点 - 使用后 -->
-                                    <circle class="chart-dot" cx="90" cy="110" r="5" fill="#10B981"/>
-                                    <circle class="chart-dot" cx="180" cy="130" r="5" fill="#10B981"/>
-                                    <circle class="chart-dot" cx="270" cy="155" r="5" fill="#10B981"/>
-                                    <circle class="chart-dot" cx="360" cy="165" r="5" fill="#10B981"/>
-                                    <circle class="chart-dot" cx="450" cy="168" r="5" fill="#10B981"/>
-                                    <circle class="chart-dot" cx="540" cy="168" r="5" fill="#10B981"/>
-                                    
-                                    <!-- 节省区域（填充） -->
-                                    <polygon fill="rgba(16, 185, 129, 0.1)" 
-                                             points="90,40 180,50 270,55 360,55 450,60 540,55 540,168 450,168 360,165 270,155 180,130 90,110"/>
-                                </svg>
-                            </div>
-                            
-                            <!-- 数据表格 -->
-                            <table class="efficiency-table">
-                                <thead>
-                                    <tr>
-                                        <th>时间</th>
-                                        <th>使用前</th>
-                                        <th>使用后</th>
-                                        <th>节省时间</th>
-                                        <th>效率提升</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>第1周</td>
-                                        <td class="time-before">35分钟</td>
-                                        <td class="time-after">28分钟</td>
-                                        <td class="saved">7分钟</td>
-                                        <td>20%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>第2周</td>
-                                        <td class="time-before">32分钟</td>
-                                        <td class="time-after">18分钟</td>
-                                        <td class="saved">14分钟</td>
-                                        <td>44%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>第3周</td>
-                                        <td class="time-before">30分钟</td>
-                                        <td class="time-after">10分钟</td>
-                                        <td class="saved">20分钟</td>
-                                        <td>67%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>第4周</td>
-                                        <td class="time-before">30分钟</td>
-                                        <td class="time-after">6分钟</td>
-                                        <td class="saved">24分钟</td>
-                                        <td>80%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>第5周</td>
-                                        <td class="time-before">28分钟</td>
-                                        <td class="time-after">5分钟</td>
-                                        <td class="saved">23分钟</td>
-                                        <td>82%</td>
-                                    </tr>
-                                    <tr style="font-weight: 600; background: var(--bg-primary);">
-                                        <td>当前</td>
-                                        <td class="time-before">30分钟</td>
-                                        <td class="time-after">5分钟</td>
-                                        <td class="saved">25分钟</td>
-                                        <td style="color: var(--success-color);">83%</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            
-                            <!-- 效率总结 -->
-                            <div class="efficiency-summary">
-                                <div class="summary-item">
-                                    <div class="summary-value positive">-83%</div>
-                                    <div class="summary-label">交接时间下降</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-value positive">37.5h</div>
-                                    <div class="summary-label">累计节省时间</div>
-                                </div>
-                                <div class="summary-item">
-                                    <div class="summary-value positive">0</div>
-                                    <div class="summary-label">信息遗漏事故</div>
-                                </div>
-                            </div>
+                        <div class="adoption-grid" id="adoptionGrid">
                         </div>
                     </div>
                 </div>
@@ -731,18 +524,25 @@
                             <span class="analytics-card-title">📊 项目状态分布</span>
                         </div>
                         <div class="analytics-card-body" id="statusDistribution">
-                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 电商素材产出 -->
+                    <div class="analytics-card">
+                        <div class="analytics-card-header">
+                            <span class="analytics-card-title">🛒 电商素材产出</span>
+                        </div>
+                        <div class="analytics-card-body" id="ecommerceStats">
                         </div>
                     </div>
                     
                     <!-- 常见卖点关键词 -->
                     <div class="analytics-card">
                         <div class="analytics-card-header">
-                            <span class="analytics-card-title">💡 常见卖点关键词</span>
+                            <span class="analytics-card-title">💡 卖点关键词</span>
                         </div>
                         <div class="analytics-card-body">
                             <div class="keyword-cloud" id="keywordCloud">
-                                <!-- 动态生成 -->
                             </div>
                         </div>
                     </div>
@@ -751,11 +551,9 @@
                     <div class="analytics-card">
                         <div class="analytics-card-header">
                             <span class="analytics-card-title">⚠️ 风险类型统计</span>
-                            <span style="font-size: 12px; color: var(--text-tertiary);">点击查看详情</span>
                         </div>
                         <div class="analytics-card-body">
                             <div class="risk-list" id="riskList">
-                                <!-- 动态生成 -->
                             </div>
                         </div>
                     </div>
@@ -765,55 +563,44 @@
                 <div class="analytics-card">
                     <div class="analytics-card-header">
                         <span class="analytics-card-title">📋 项目详情列表</span>
-                        <span style="font-size: 12px; color: var(--text-tertiary);" id="filteredCount">共 0 个项目</span>
+                        <span style="font-size:12px;color:var(--text-tertiary);" id="filteredCount">共 0 个项目</span>
                     </div>
                     <div class="project-detail-list" id="projectDetailList">
-                        <!-- 动态生成 -->
                     </div>
                 </div>
             </div>
         </main>
     </div>
     
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
     
     <script src="app.js"></script>
     <script>
         // ========================================
-        // 分析页数据
+        // 效率看板 — 全部数据从项目实时计算
         // ========================================
         
-        // 当前筛选状态
-        let currentFilters = {
-            project: 'all',
-            status: 'all',
-            dateFrom: '2024-01-01',
-            dateTo: '2024-02-28'
-        };
-        
-        // ========================================
-        // 初始化
-        // ========================================
+        let currentFilters = { project: 'all', status: 'all' };
         
         function init() {
             populateProjectFilter();
+            renderAll();
+            bindEvents();
+        }
+        
+        function renderAll() {
+            renderAdoptionRate();
             renderStatusDistribution();
+            renderEcommerceStats();
             renderKeywordCloud();
             renderRiskList();
             renderProjectDetailList();
             updateStats();
-            bindEvents();
         }
-        
-        // ========================================
-        // 填充项目筛选器
-        // ========================================
         
         function populateProjectFilter() {
             const projects = getAllProjects();
             const select = document.getElementById('projectFilter');
-            
             projects.forEach(p => {
                 const option = document.createElement('option');
                 option.value = p.id;
@@ -822,32 +609,76 @@
             });
         }
         
-        // ========================================
-        // 渲染函数
-        // ========================================
-        
         function getFilteredProjects() {
-            const allProjects = getAllProjects();
-            
-            return allProjects.filter(p => {
-                // 项目筛选
-                if (currentFilters.project !== 'all' && p.id !== currentFilters.project) {
-                    return false;
-                }
-                // 状态筛选
-                if (currentFilters.status !== 'all' && p.status !== currentFilters.status) {
-                    return false;
-                }
-                // 日期筛选
-                const projectDate = new Date(p.createdAt);
-                const fromDate = new Date(currentFilters.dateFrom);
-                const toDate = new Date(currentFilters.dateTo);
-                if (projectDate < fromDate || projectDate > toDate) {
-                    return false;
-                }
+            return getAllProjects().filter(p => {
+                if (currentFilters.project !== 'all' && p.id !== currentFilters.project) return false;
+                if (currentFilters.status !== 'all' && p.status !== currentFilters.status) return false;
                 return true;
             });
         }
+        
+        // ========================================
+        // AI 标注采纳率 — 从 status 字段实时计算
+        // ========================================
+        
+        function renderAdoptionRate() {
+            const filtered = getFilteredProjects();
+            
+            const categories = [
+                { key: 'sellingPoints', label: '核心卖点', items: [] },
+                { key: 'timestamps', label: '关键时间点', items: [] },
+                { key: 'cautions', label: '注意事项', items: [] }
+            ];
+            
+            filtered.forEach(p => {
+                categories.forEach(cat => {
+                    if (p[cat.key]) cat.items.push(...p[cat.key]);
+                });
+            });
+            
+            const container = document.getElementById('adoptionGrid');
+            container.innerHTML = categories.map(cat => {
+                const total = cat.items.length;
+                if (total === 0) {
+                    return `<div class="adoption-item">
+                        <div class="adoption-ring">
+                            <svg width="80" height="80"><circle cx="40" cy="40" r="32" fill="none" stroke="#E5E7EB" stroke-width="6"/></svg>
+                            <div class="adoption-ring-label low">—</div>
+                        </div>
+                        <div class="adoption-name">${cat.label}</div>
+                        <div class="adoption-detail">暂无数据</div>
+                    </div>`;
+                }
+                
+                const confirmed = cat.items.filter(i => i.status === 'confirmed').length;
+                const edited = cat.items.filter(i => i.status === 'edited').length;
+                const adopted = confirmed + edited;
+                const rate = Math.round(adopted / total * 100);
+                const rateClass = rate >= 70 ? 'good' : rate >= 40 ? 'warn' : 'low';
+                
+                const circumference = 2 * Math.PI * 32;
+                const dashOffset = circumference * (1 - rate / 100);
+                const strokeColor = rate >= 70 ? '#10B981' : rate >= 40 ? '#F59E0B' : '#EF4444';
+                
+                return `<div class="adoption-item">
+                    <div class="adoption-ring">
+                        <svg width="80" height="80">
+                            <circle cx="40" cy="40" r="32" fill="none" stroke="#E5E7EB" stroke-width="6"/>
+                            <circle cx="40" cy="40" r="32" fill="none" stroke="${strokeColor}" stroke-width="6"
+                                    stroke-dasharray="${circumference}" stroke-dashoffset="${dashOffset}"
+                                    stroke-linecap="round"/>
+                        </svg>
+                        <div class="adoption-ring-label ${rateClass}">${rate}%</div>
+                    </div>
+                    <div class="adoption-name">${cat.label}</div>
+                    <div class="adoption-detail">确认 ${confirmed} · 编辑 ${edited} / 共 ${total}</div>
+                </div>`;
+            }).join('');
+        }
+        
+        // ========================================
+        // 项目状态分布
+        // ========================================
         
         function renderStatusDistribution() {
             const filtered = getFilteredProjects();
@@ -856,15 +687,14 @@
             const archived = filtered.filter(p => p.status === 'archived').length;
             const total = filtered.length || 1;
             
-            const container = document.getElementById('statusDistribution');
-            container.innerHTML = `
+            document.getElementById('statusDistribution').innerHTML = `
                 <div class="status-bar">
                     <div class="status-bar-header">
                         <span class="status-bar-label">待剪辑确认</span>
                         <span class="status-bar-value">${pending}</span>
                     </div>
                     <div class="status-bar-track">
-                        <div class="status-bar-fill pending" style="width: ${(pending/total*100)}%">${pending > 0 ? pending + '个' : ''}</div>
+                        <div class="status-bar-fill pending" style="width:${pending/total*100}%">${pending > 0 ? pending + '个' : ''}</div>
                     </div>
                 </div>
                 <div class="status-bar">
@@ -873,7 +703,7 @@
                         <span class="status-bar-value">${delivered}</span>
                     </div>
                     <div class="status-bar-track">
-                        <div class="status-bar-fill delivered" style="width: ${(delivered/total*100)}%">${delivered > 0 ? delivered + '个' : ''}</div>
+                        <div class="status-bar-fill delivered" style="width:${delivered/total*100}%">${delivered > 0 ? delivered + '个' : ''}</div>
                     </div>
                 </div>
                 <div class="status-bar">
@@ -882,59 +712,106 @@
                         <span class="status-bar-value">${archived}</span>
                     </div>
                     <div class="status-bar-track">
-                        <div class="status-bar-fill archived" style="width: ${(archived/total*100)}%">${archived > 0 ? archived + '个' : ''}</div>
+                        <div class="status-bar-fill archived" style="width:${archived/total*100}%">${archived > 0 ? archived + '个' : ''}</div>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
         
-        function renderKeywordCloud() {
+        // ========================================
+        // 电商素材产出 — 从 ecommerceAssets 聚合
+        // ========================================
+        
+        function renderEcommerceStats() {
             const filtered = getFilteredProjects();
-            const keywordCounts = {};
+            let totalAssets = 0, confirmedAssets = 0, totalProducts = new Set();
             
-            // 从卖点中提取关键词
             filtered.forEach(p => {
-                if (p.sellingPoints) {
-                    p.sellingPoints.forEach(sp => {
-                        // 简单的关键词提取
-                        const keywords = extractKeywords(sp.content);
-                        keywords.forEach(k => {
-                            keywordCounts[k] = (keywordCounts[k] || 0) + 1;
-                        });
+                if (p.ecommerceAssets) {
+                    totalAssets += p.ecommerceAssets.length;
+                    confirmedAssets += p.ecommerceAssets.filter(a => a.status === 'confirmed').length;
+                    p.ecommerceAssets.forEach(a => {
+                        if (a.product) totalProducts.add(a.product);
                     });
                 }
             });
             
-            const sorted = Object.entries(keywordCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
+            document.getElementById('ecommerceStats').innerHTML = totalAssets === 0
+                ? '<div class="empty-analytics"><p>暂无电商素材数据</p></div>'
+                : `<div class="ecommerce-stats">
+                    <div class="eco-stat">
+                        <div class="eco-stat-value">${totalAssets}</div>
+                        <div class="eco-stat-label">识别片段</div>
+                    </div>
+                    <div class="eco-stat">
+                        <div class="eco-stat-value">${confirmedAssets}</div>
+                        <div class="eco-stat-label">已确认可用</div>
+                    </div>
+                    <div class="eco-stat">
+                        <div class="eco-stat-value">${totalProducts.size}</div>
+                        <div class="eco-stat-label">涉及产品</div>
+                    </div>
+                </div>`;
+        }
+        
+        // ========================================
+        // 卖点关键词 — 直接从卖点文本提取高频词
+        // ========================================
+        
+        function renderKeywordCloud() {
+            const filtered = getFilteredProjects();
+            const wordCounts = {};
+            
+            filtered.forEach(p => {
+                if (p.sellingPoints) {
+                    p.sellingPoints.forEach(sp => {
+                        const words = extractKeywords(sp.content);
+                        words.forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; });
+                    });
+                }
+                if (p.ecommerceAssets) {
+                    p.ecommerceAssets.forEach(a => {
+                        if (a.consumerLanguage) {
+                            const words = extractKeywords(a.consumerLanguage);
+                            words.forEach(w => { wordCounts[w] = (wordCounts[w] || 0) + 1; });
+                        }
+                    });
+                }
+            });
+            
+            const sorted = Object.entries(wordCounts).sort((a, b) => b[1] - a[1]).slice(0, 15);
             const container = document.getElementById('keywordCloud');
             
             if (sorted.length === 0) {
-                container.innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无关键词数据</p>';
+                container.innerHTML = '<p style="color:var(--text-tertiary);text-align:center;padding:20px;">暂无关键词数据</p>';
                 return;
             }
             
-            container.innerHTML = sorted.map(([keyword, count], index) => {
-                const size = index < 2 ? 'lg' : index < 5 ? 'md' : 'sm';
-                return `<span class="keyword-tag size-${size}" data-keyword="${keyword}">${keyword}</span>`;
+            container.innerHTML = sorted.map(([kw, count], i) => {
+                const size = i < 3 ? 'lg' : i < 7 ? 'md' : 'sm';
+                return `<span class="keyword-tag size-${size}" data-keyword="${kw}">${kw} (${count})</span>`;
             }).join('');
         }
         
         function extractKeywords(text) {
+            if (!text) return [];
             const keywords = [];
             const patterns = [
                 '性价比', '画质', '便携', '稳定', '防抖', '4K', '8K', '7K',
                 '直播', '推流', '对焦', '续航', '色彩', '专业', '电影感',
-                'Raw', '全画幅', '大底', '翻转屏', '触控', '无线'
+                'Raw', '全画幅', '大底', '翻转屏', '触控', '无线',
+                '保暖', '保温', '防风', '防水', '轻量', '耐穿', '面料',
+                '3M', '新雪丽', '冲锋衣', '滤镜', 'Snap', 'STORMCREW',
+                '零下', '极寒', '户外', '实测', '穿搭', '模特'
             ];
-            
             patterns.forEach(p => {
-                if (text.includes(p)) {
-                    keywords.push(p);
-                }
+                if (text.includes(p)) keywords.push(p);
             });
-            
             return keywords;
         }
+        
+        // ========================================
+        // 风险类型统计
+        // ========================================
         
         function renderRiskList() {
             const filtered = getFilteredProjects();
@@ -944,14 +821,8 @@
                 if (p.cautions) {
                     p.cautions.forEach(c => {
                         const type = c.level === 'medium' ? '中风险' : '低风险';
-                        if (!risksByType[type]) {
-                            risksByType[type] = [];
-                        }
-                        risksByType[type].push({
-                            content: c.content,
-                            projectId: p.id,
-                            projectTitle: p.title
-                        });
+                        if (!risksByType[type]) risksByType[type] = [];
+                        risksByType[type].push({ content: c.content, projectId: p.id, projectTitle: p.title });
                     });
                 }
             });
@@ -974,20 +845,25 @@
                 </div>
             `).join('');
             
-            // 绑定点击事件
             container.querySelectorAll('.risk-item').forEach(item => {
                 item.addEventListener('click', function() {
                     const type = this.dataset.type;
-                    const relatedRisks = risksByType[type];
-                    showRiskDetail(type, relatedRisks);
+                    const related = risksByType[type];
+                    const detail = related.map(r => `• ${r.projectTitle}: ${r.content}`).join('\n');
+                    if (confirm(`【${type}】详情：\n\n${detail}\n\n点击确定跳转第一个相关项目`)) {
+                        if (related.length > 0) window.location.href = `project.html?id=${related[0].projectId}`;
+                    }
                 });
             });
         }
         
+        // ========================================
+        // 项目详情列表
+        // ========================================
+        
         function renderProjectDetailList() {
             const filtered = getFilteredProjects();
             const container = document.getElementById('projectDetailList');
-            
             document.getElementById('filteredCount').textContent = `共 ${filtered.length} 个项目`;
             
             if (filtered.length === 0) {
@@ -995,16 +871,11 @@
                 return;
             }
             
-            const statusLabels = {
-                pending: '待剪辑确认',
-                delivered: '已交付运营',
-                archived: '已上线归档'
-            };
+            const statusLabels = { pending: '待剪辑确认', delivered: '已交付运营', archived: '已上线归档' };
             
             container.innerHTML = filtered.map(p => {
                 const pointCount = p.sellingPoints ? p.sellingPoints.length : 0;
-                const riskCount = p.cautions ? p.cautions.length : 0;
-                
+                const ecoCount = p.ecommerceAssets ? p.ecommerceAssets.length : 0;
                 return `
                 <div class="project-detail-item" data-id="${p.id}">
                     <div class="project-detail-info">
@@ -1020,47 +891,40 @@
                             <div class="project-stat-label">卖点</div>
                         </div>
                         <div class="project-stat">
-                            <div class="project-stat-value risk">${riskCount}</div>
-                            <div class="project-stat-label">风险</div>
+                            <div class="project-stat-value" style="color:#10B981">${ecoCount}</div>
+                            <div class="project-stat-label">电商素材</div>
                         </div>
                     </div>
-                </div>
-            `}).join('');
+                </div>`;
+            }).join('');
             
-            // 绑定点击事件
             container.querySelectorAll('.project-detail-item').forEach(item => {
                 item.addEventListener('click', function() {
-                    const id = this.dataset.id;
-                    window.location.href = `project.html?id=${id}`;
+                    window.location.href = `project.html?id=${this.dataset.id}`;
                 });
             });
         }
+        
+        // ========================================
+        // 概览统计
+        // ========================================
         
         function updateStats() {
             const filtered = getFilteredProjects();
             document.getElementById('totalProjects').textContent = filtered.length;
             
-            let totalAnnotations = 0;
-            let totalRisks = 0;
+            let totalAnnotations = 0, totalRisks = 0, totalAssets = 0;
             filtered.forEach(p => {
-                totalAnnotations += (p.sellingPoints ? p.sellingPoints.length : 0) + 
+                totalAnnotations += (p.sellingPoints ? p.sellingPoints.length : 0) +
                                    (p.timestamps ? p.timestamps.length : 0) +
                                    (p.cautions ? p.cautions.length : 0);
                 totalRisks += p.cautions ? p.cautions.length : 0;
+                totalAssets += p.ecommerceAssets ? p.ecommerceAssets.length : 0;
             });
             
             document.getElementById('totalAnnotations').textContent = totalAnnotations;
             document.getElementById('totalRisks').textContent = totalRisks;
-        }
-        
-        function showRiskDetail(type, risks) {
-            const detail = risks.map(r => `• ${r.projectTitle}: ${r.content}`).join('\n');
-            
-            if (confirm(`【${type}】详情：\n\n${detail}\n\n点击"确定"跳转到第一个相关项目`)) {
-                if (risks.length > 0) {
-                    window.location.href = `project.html?id=${risks[0].projectId}`;
-                }
-            }
+            document.getElementById('totalAssets').textContent = totalAssets;
         }
         
         // ========================================
@@ -1068,64 +932,33 @@
         // ========================================
         
         function bindEvents() {
-            // 应用筛选
             document.getElementById('applyFilter').addEventListener('click', function() {
                 currentFilters.project = document.getElementById('projectFilter').value;
                 currentFilters.status = document.getElementById('statusFilter').value;
-                currentFilters.dateFrom = document.getElementById('dateFrom').value;
-                currentFilters.dateTo = document.getElementById('dateTo').value;
-                
-                // 更新显示
-                renderStatusDistribution();
-                renderKeywordCloud();
-                renderRiskList();
-                renderProjectDetailList();
-                updateStats();
-                
-                // 更新日期显示
-                document.getElementById('dateRangeDisplay').textContent = 
-                    `显示: ${currentFilters.dateFrom} 至 ${currentFilters.dateTo}`;
-                
+                renderAll();
                 showToast('筛选已应用');
             });
             
-            // 重置筛选
             document.getElementById('resetFilter').addEventListener('click', function() {
                 document.getElementById('projectFilter').value = 'all';
                 document.getElementById('statusFilter').value = 'all';
-                document.getElementById('dateFrom').value = '2024-01-01';
-                document.getElementById('dateTo').value = '2024-02-28';
-                
-                currentFilters = {
-                    project: 'all',
-                    status: 'all',
-                    dateFrom: '2024-01-01',
-                    dateTo: '2024-02-28'
-                };
-                
-                renderStatusDistribution();
-                renderKeywordCloud();
-                renderRiskList();
-                renderProjectDetailList();
-                updateStats();
-                
-                document.getElementById('dateRangeDisplay').textContent = '显示: 全部时间';
+                currentFilters = { project: 'all', status: 'all' };
+                renderAll();
                 showToast('筛选已重置');
             });
             
-            // 关键词点击
             document.getElementById('keywordCloud').addEventListener('click', function(e) {
                 if (e.target.classList.contains('keyword-tag')) {
-                    const keyword = e.target.dataset.keyword;
-                    const relatedProjects = getFilteredProjects().filter(p => 
-                        p.sellingPoints && p.sellingPoints.some(sp => sp.content.includes(keyword))
+                    const kw = e.target.dataset.keyword;
+                    const related = getFilteredProjects().filter(p =>
+                        (p.sellingPoints && p.sellingPoints.some(sp => sp.content.includes(kw))) ||
+                        (p.ecommerceAssets && p.ecommerceAssets.some(a => a.consumerLanguage && a.consumerLanguage.includes(kw)))
                     );
-                    alert(`关键词【${keyword}】出现在以下项目中：\n\n${relatedProjects.map(p => '• ' + p.title).join('\n')}`);
+                    alert(`关键词【${kw}】出现在以下项目中：\n\n${related.map(p => '• ' + p.title).join('\n')}`);
                 }
             });
         }
         
-        // 初始化
         init();
     </script>
 </body>
