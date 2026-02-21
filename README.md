@@ -86,7 +86,7 @@ AI 看视频写结构化草稿 → 剪辑师扫两分钟确认「对不对」→
 
 ### 4. 电商视角 —— 平行管线
 
-![电商视角](screenshots/05_ecommerce_view.png)
+![电商视角](screenshots/07_ecommerce_view.png)
 
 电商视角是独立于剪辑→运营交付链的**平行管线**，不依赖项目交付状态：
 
@@ -97,7 +97,7 @@ AI 看视频写结构化草稿 → 剪辑师扫两分钟确认「对不对」→
 
 ### 5. 效率看板
 
-![效率看板](screenshots/06_analytics.png)
+![效率看板](screenshots/08_analytics.png)
 
 从项目数据实时汇总：
 
@@ -108,7 +108,7 @@ AI 看视频写结构化草稿 → 剪辑师扫两分钟确认「对不对」→
 
 ### 6. Skill 工作台（Beta）
 
-![Skill工作台](screenshots/07_skill_workbench.png)
+![Skill工作台](screenshots/09_skill_workbench.png)
 
 AI 从团队实际操作中自动沉淀可复用打法：
 
