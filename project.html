@@ -977,10 +977,13 @@
         
         function renderAnnotations() {
             const container = document.getElementById('annotationContent');
+            const isOps = currentView === 'operator';
+            
+            const coreVisible = !isOps || projectData.corePosition.status !== 'ai';
             
             container.innerHTML = `
                 <!-- 核心定位 -->
-                <div class="info-card">
+                ${coreVisible ? `<div class="info-card">
                     <div class="info-card-header">
                         <span class="info-card-title">🎯 核心定位</span>
                         <div class="info-card-actions">
@@ -1001,7 +1004,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>` : ''}
                 
                 <!-- 核心卖点 -->
                 <div class="info-card">
@@ -1049,7 +1052,8 @@
                 return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无卖点数据</p>';
             }
             
-            return projectData.sellingPoints.map(point => {
+            const isOps = currentView === 'operator';
+            return projectData.sellingPoints.filter(p => !isOps || p.status !== 'ai').map(point => {
                 const src = point.source && SOURCE_CONFIG[point.source] ? SOURCE_CONFIG[point.source] : null;
                 const sourceTag = src ? `<span class="ecommerce-source-tag" style="background:${src.bg};color:${src.color};font-size:10px;margin-left:6px;">${src.label}</span>` : '';
                 return `
@@ -1077,7 +1081,8 @@
                 return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">暂无时间点数据</p>';
             }
             
-            return projectData.timestamps.map(ts => `
+            const isOps = currentView === 'operator';
+            return projectData.timestamps.filter(t => !isOps || t.status !== 'ai').map(ts => `
                 <div class="timestamp-item ${ts.status}" data-id="${ts.id}" data-seconds="${ts.seconds || 0}">
                     <input type="checkbox" class="annotation-checkbox timestamp-cb" 
                            data-id="${ts.id}" ${ts.status === 'confirmed' ? 'checked' : ''}>
@@ -1101,7 +1106,8 @@
                 return '<p style="color: var(--text-tertiary); text-align: center; padding: 20px;">✅ 无风险预警</p>';
             }
             
-            return projectData.cautions.map(c => `
+            const isOps = currentView === 'operator';
+            return projectData.cautions.filter(c => !isOps || c.status !== 'ai').map(c => `
                 <div class="caution-item level-${c.level} ${c.status}" data-id="${c.id}">
                     <div class="caution-header">
                         <div style="display: flex; align-items: center; gap: 8px;">
